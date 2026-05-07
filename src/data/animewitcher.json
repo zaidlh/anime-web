@@ -1,0 +1,80 @@
+{
+  "source": "animewitcher",
+  "scraped_at": 1715000000,
+  "count": 2,
+  "titles": [
+    {
+      "id": "demon-slayer-tv",
+      "name": "Kimetsu no Yaiba",
+      "english_title": "Demon Slayer",
+      "type": "TV",
+      "poster": "https://m.media-amazon.com/images/M/MV5BZjZjNzI5MDctY2Y4YS00NmM4LTljMTQtOTgwZGZlNjk2OWY4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+      "story": "A family is attacked by demons and only two members survive - Tanjiro and his sister Nezuko, who is turning into a demon slowly. Tanjiro sets out to become a demon slayer to avenge his family and cure his sister.",
+      "tags": ["Action", "Fantasy", "Historical"],
+      "episodes": [
+        {
+          "doc_id": "ep1",
+          "number": 1,
+          "name": "Cruelty",
+          "thumb": "https://m.media-amazon.com/images/M/MV5BNWRkNTAyZTEtMDg5Ny00MzEwLTgxZmUtMjg1ZmY1NzgxZTMyXkEyXkFqcGc@._V1_.jpg",
+          "bunny_video_id": null,
+          "servers": [
+            {
+              "name": "Test1080",
+              "quality": "1080p",
+              "link": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4",
+              "open_browser": false
+            },
+            {
+              "name": "Test720",
+              "quality": "720p",
+              "link": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
+              "open_browser": false
+            }
+          ]
+        },
+        {
+          "doc_id": "ep2",
+          "number": 2,
+          "name": "Trainer Sakonji Urokodaki",
+          "thumb": null,
+          "bunny_video_id": null,
+          "servers": [
+            {
+              "name": "Okru",
+              "quality": "720p",
+              "link": "https://www.youtube.com/embed/aqz-KE-bpKQ",
+              "open_browser": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "your-name-movie",
+      "name": "Kimi no Na wa.",
+      "english_title": "Your Name.",
+      "type": "Movie",
+      "poster": "https://m.media-amazon.com/images/M/MV5BODRmZDVmNzUtZDA4ZC00NjhkLWI2M2UtN2M0ZDIzNDcxYThjL2ltYWdlXkEyXkFqcGdeQXVyNTk0MzMzODA@._V1_FMjpg_UX1000_.jpg",
+      "story": "Two teenagers share a profound, magical connection upon discovering they are swapping bodies. Things manage to become even more complicated when the boy and girl decide to meet in person.",
+      "tags": ["Romance", "Supernatural", "Drama"],
+      "episodes": [
+        {
+          "doc_id": "ep1",
+          "number": 1,
+          "name": "Complete Movie",
+          "thumb": null,
+          "bunny_video_id": null,
+          "servers": [
+             {
+              "name": "DirectMP4",
+              "quality": "1080p",
+              "link": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4",
+              "open_browser": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
