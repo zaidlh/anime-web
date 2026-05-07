@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Maximize, Play, Pause, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ClassifiedServer, getBestServer } from '../lib/servers';
 
 interface VideoPlayerProps {
@@ -7,15 +7,21 @@ interface VideoPlayerProps {
   poster: string | null;
   title: string;
   episodeName: string;
+  titleDetailUrl: string;
+  downloadUrl: string;
+  prevEpUrl: string | null;
+  nextEpUrl: string | null;
 }
 
-export function VideoPlayer({ servers, poster, title, episodeName }: VideoPlayerProps) {
+export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUrl, downloadUrl, prevEpUrl, nextEpUrl }: VideoPlayerProps) {
   const [selectedServer, setSelectedServer] = useState<ClassifiedServer | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const best = getBestServer(servers);
     setSelectedServer(best);
+    setVideoError(null);
   }, [servers]);
 
   useEffect(() => {
@@ -56,27 +62,10 @@ export function VideoPlayer({ servers, poster, title, episodeName }: VideoPlayer
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleQualityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const s = servers.find(x => x.name === e.target.value);
-    if (s && videoRef.current) {
-      const cTime = videoRef.current.currentTime;
-      const isPaused = videoRef.current.paused;
-      setSelectedServer(s);
-      
-      // Need a slight delay to let react re-render the source URL
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = cTime;
-          if (!isPaused) videoRef.current.play();
-        }
-      }, 50);
-    }
-  };
-
   if (!selectedServer) {
     return (
-      <div className="w-full aspect-video bg-black rounded-lg flex flex-col items-center justify-center p-8 text-center border border-[#262626]">
-        <div className="mb-4 text-[#a3a3a3]">This episode is only available via external hosts.</div>
+      <div className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow flex flex-col items-center justify-center p-8 text-center">
+        <div className="mb-4 text-on-surface-variant">This episode is only available via external hosts.</div>
         <div className="flex flex-wrap gap-4 justify-center">
           {servers.map((s, i) => (
             <a
@@ -84,9 +73,9 @@ export function VideoPlayer({ servers, poster, title, episodeName }: VideoPlayer
               href={s.originalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-[#262626] hover:bg-[#333] px-4 py-2 rounded-md transition-colors"
+              className="flex items-center gap-2 bg-surface-container-high hover:bg-surface-variant px-4 py-2 rounded-lg transition-colors font-bold text-on-surface"
             >
-              Open on {s.name} <ExternalLink className="w-4 h-4" />
+              Open on {s.name} <span className="material-symbols-outlined text-[18px]">open_in_new</span>
             </a>
           ))}
         </div>
@@ -95,69 +84,155 @@ export function VideoPlayer({ servers, poster, title, episodeName }: VideoPlayer
   }
 
   const nativeServers = servers.filter(s => s.capability === 'native');
+  const iframeServers = servers.filter(s => s.capability === 'iframe');
+  const allServers = [...nativeServers, ...iframeServers];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative group bg-black rounded-lg overflow-hidden border border-[#262626] shadow-xl">
+    <div className="flex flex-col gap-lg">
+      <section className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20">
         {selectedServer.capability === 'native' ? (
-          <video
-            ref={videoRef}
-            controls
-            preload="metadata"
-            poster={poster || undefined}
-            src={selectedServer.directUrl as string}
-            className="w-full aspect-video outline-none"
-          >
-            Your browser does not support the video tag.
-          </video>
+          <>
+            {videoError && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 text-center p-6 backdrop-blur-sm">
+                <span className="material-symbols-outlined text-[48px] text-error mb-4">error_outline</span>
+                <p className="font-headline-md font-bold text-on-surface mb-2">Playback Error</p>
+                <p className="font-body-md text-on-surface-variant max-w-md">{videoError}</p>
+                <button 
+                  onClick={() => setVideoError(null)}
+                  className="mt-6 px-lg py-sm bg-surface-container rounded-lg font-title-sm font-bold text-on-surface hover:bg-surface-variant transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+            <video
+              ref={videoRef}
+              controls
+              preload="metadata"
+              poster={poster || undefined}
+              src={selectedServer.directUrl as string}
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover outline-none"
+              onError={(e) => {
+                console.error("Video error:", e);
+                setVideoError("The video stream could not be loaded. Please try selecting a different server.");
+              }}
+            >
+              Your browser does not support the video tag.
+            </video>
+          </>
         ) : (
-          <div className="relative w-full aspect-video">
+          <div className="relative w-full h-full">
             <iframe
               src={selectedServer.embedUrl as string}
               allowFullScreen
+              referrerPolicy="no-referrer"
               className="w-full h-full border-0"
               title={`${title} - ${episodeName}`}
             />
-            <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded text-xs font-medium border border-white/10 pointer-events-none">
+            <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-label-caps font-bold pointer-events-none">
               Playing from {selectedServer.name}
             </div>
           </div>
         )}
-      </div>
+      </section>
 
-      <div className="bg-[#1a1a1a] p-4 rounded-lg border border-[#262626] flex flex-wrap gap-4 justify-between items-center">
-        <div>
-          <h2 className="text-lg font-semibold text-white">{episodeName}</h2>
-          <div className="text-sm text-[#a3a3a3]">Playing {selectedServer.quality || 'Auto'} on {selectedServer.name}</div>
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-md mb-xl">
+        <div className="flex-1">
+          <h1 className="font-display-lg text-[36px] text-on-surface mb-xs leading-tight font-black">{episodeName}</h1>
+          <p className="font-title-sm text-on-surface-variant/80">
+            Part of <Link className="text-primary hover:text-primary-container font-bold transition-all underline decoration-primary/30 underline-offset-4" to={titleDetailUrl}>{title}</Link>
+          </p>
+
+          <div className="flex items-center mt-md">
+            <div className="inline-flex rounded-xl border border-outline-variant/30 bg-surface-container-low overflow-hidden shadow-lg">
+              {prevEpUrl ? (
+                <Link to={prevEpUrl} className="flex items-center gap-xs px-md py-3 hover:bg-surface-variant transition-all font-title-sm text-on-surface border-r border-outline-variant/30 font-bold">
+                  <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                  Previous
+                </Link>
+              ) : (
+                <span className="flex items-center gap-xs px-md py-3 text-on-surface-variant opacity-50 border-r border-outline-variant/30 font-bold font-title-sm cursor-not-allowed">
+                  <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                  Previous
+                </span>
+              )}
+              
+              <Link to={titleDetailUrl} className="flex items-center gap-xs px-md py-3 hover:bg-surface-variant transition-all font-title-sm text-on-surface border-r border-outline-variant/30 font-bold">
+                <span className="material-symbols-outlined text-[18px]">grid_view</span>
+                Episode List
+              </Link>
+              
+              {nextEpUrl ? (
+                <Link to={nextEpUrl} className="flex items-center gap-xs px-md py-3 hover:bg-surface-variant transition-all font-title-sm text-on-surface font-bold">
+                  Next
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </Link>
+              ) : (
+                <span className="flex items-center gap-xs px-md py-3 text-on-surface-variant opacity-50 font-bold font-title-sm cursor-not-allowed">
+                  Next
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
-        {nativeServers.length > 1 && selectedServer.capability === 'native' && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Quality:</span>
-            <select
-              className="bg-[#0f0f0f] border border-[#262626] rounded px-3 py-1.5 text-sm outline-none focus:border-blue-500"
-              value={selectedServer.name}
-              onChange={handleQualityChange}
-            >
-              {nativeServers.map(s => (
-                <option key={s.name} value={s.name}>
-                  {s.quality || 'Standard'} ({s.name})
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div className="w-full lg:w-auto mt-md lg:mt-0">
+          <Link to={downloadUrl} className="w-full lg:w-auto flex items-center justify-center gap-sm px-lg py-4 rounded-xl bg-primary-container text-on-primary-container font-headline-md text-[18px] shadow-xl hover:brightness-110 active:scale-[0.98] transition-all font-bold">
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'wght' 600" }}>download</span>
+            Download Episode
+          </Link>
+        </div>
+      </div>
 
-        {selectedServer.capability === 'iframe' && (
-             <a
-             href={selectedServer.embedUrl as string}
-             target="_blank"
-             rel="noopener noreferrer"
-             className="flex items-center gap-2 bg-[#262626] hover:bg-[#333] px-3 py-1.5 rounded-md text-sm transition-colors"
-           >
-             Open in New Tab <ExternalLink className="w-4 h-4" />
-           </a>
-        )}
+      <div className="mb-md">
+        <h3 className="font-label-caps text-label-caps text-primary/70 tracking-[0.2em] uppercase mb-sm font-bold">Select Streaming Server</h3>
+        <div className="flex flex-wrap gap-md">
+          {allServers.map((s, i) => {
+            const isSelected = selectedServer.name === s.name && selectedServer.quality === s.quality;
+            return (
+              <button
+                key={`${s.name}-${s.quality}-${i}`}
+                onClick={() => {
+                  setVideoError(null);
+                  if (videoRef.current) {
+                    const cTime = videoRef.current.currentTime;
+                    const isPaused = videoRef.current.paused;
+                    setSelectedServer(s);
+                    setTimeout(() => {
+                      if (videoRef.current) {
+                        videoRef.current.currentTime = cTime;
+                        if (!isPaused) videoRef.current.play();
+                      }
+                    }, 50);
+                  } else {
+                    setSelectedServer(s);
+                  }
+                }}
+                className={`group flex items-center gap-sm p-3 pr-6 rounded-xl transition-all ${
+                  isSelected 
+                    ? 'bg-secondary-container/10 border-2 border-secondary-container text-on-secondary-container hover:bg-secondary-container/20'
+                    : 'bg-surface-container-high/50 border-2 border-outline-variant/30 text-on-surface-variant hover:border-outline hover:text-on-surface'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                  isSelected ? 'bg-secondary-container' : 'bg-surface-container-highest group-hover:bg-primary/20 group-hover:text-primary'
+                }`}>
+                   <span className={`material-symbols-outlined ${isSelected ? 'text-white' : ''}`}>
+                      {s.capability === 'native' ? 'dns' : 'cloud_queue'}
+                   </span>
+                </div>
+                <div className="text-left">
+                  <p className={`font-label-caps text-[10px] uppercase font-bold ${isSelected ? 'text-secondary/60' : 'text-outline'}`}>
+                    {s.capability === 'native' ? 'Direct Source' : 'External Player'}
+                  </p>
+                  <p className="font-title-sm font-bold">{s.name} {s.quality && <span className="font-normal opacity-80">- {s.quality}</span>}</p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   );

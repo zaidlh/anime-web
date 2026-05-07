@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitives
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    // User Validation
+    function isUserUpdateAction() { return true; }
+    function isValidUser(data) {
+      return data.email is string && data.email.size() <= 256
+        && data.displayName is string && data.displayName.size() <= 100
+        && (data.photoURL is string || data.photoURL == null)
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+    function isValidUserUpdate(data) {
+      return data.email is string && data.email.size() <= 256
+        && data.displayName is string && data.displayName.size() <= 100
+        && (data.photoURL is string || data.photoURL == null)
+        && data.updatedAt == request.time;
+    }
+
+    // List Item Validation
+    function isValidListItem(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.source is string && data.source.size() <= 128
+        && data.title is string && data.title.size() <= 512
+        && (data.poster is string || data.poster == null)
+        && (data.type is string || data.type == null)
+        && data.addedAt is number;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId 
+                    && isValidId(userId)
+                    && incoming().keys().hasAll(['email', 'displayName', 'photoURL', 'createdAt', 'updatedAt'])
+                    && incoming().keys().size() == 5
+                    && isValidUser(incoming());
+      allow update: if isSignedIn() && request.auth.uid == userId 
+                    && isValidId(userId)
+                    && isValidUserUpdate(incoming())
+                    && incoming().createdAt == existing().createdAt
+                    && isUserUpdateAction() 
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'updatedAt']);
+      allow delete: if false;
+
+      match /myList/{listItemId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(listItemId);
+        allow list: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn() && request.auth.uid == userId 
+                      && isValidId(userId) && isValidId(listItemId)
+                      && incoming().keys().hasAll(['id', 'source', 'title', 'poster', 'type', 'addedAt'])
+                      && incoming().keys().size() == 6
+                      && isValidListItem(incoming());
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(listItemId);
+        allow update: if false;
+      }
+    }
+  }
+}

@@ -1,15 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Download, ExternalLink } from 'lucide-react';
-import { 
-  AnimeWitcherEpisode, 
-  Asia2TVEpisode, 
-  ServerInfo, 
-  SourceType 
-} from '../lib/data';
+import { AnimeWitcherEpisode, Asia2TVEpisode, ServerInfo, SourceType } from '../lib/data';
 import { classifyServerUrl } from '../lib/servers';
 import { encodeBase64Url } from '../lib/utils';
-import { PlaceholderImage } from './PlaceholderImage';
 
 interface EpisodeListProps {
   source: SourceType;
@@ -21,105 +14,82 @@ export function EpisodeList({ source, titleId, episodes }: EpisodeListProps) {
   const encId = source === 'animewitcher' ? encodeURIComponent(titleId) : encodeBase64Url(titleId);
 
   return (
-    <div className="bg-[#1a1a1a] rounded-lg border border-[#262626] overflow-hidden">
-      <div className="p-4 border-b border-[#262626] flex justify-between items-center">
-        <h3 className="font-semibold text-lg text-white">Episodes ({episodes.length})</h3>
+    <section className="mt-8 md:mt-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <div>
+          <div className="flex items-center gap-4 mb-1">
+            <h3 className="font-display-lg text-[24px] md:text-[32px] font-bold text-on-surface">Episodes</h3>
+            <div className="bg-surface-container-high px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer hover:bg-surface-variant transition-colors border border-outline">
+              <span className="font-title-sm text-sm font-semibold">Season 1</span>
+              <span className="material-symbols-outlined text-[16px]">expand_more</span>
+            </div>
+          </div>
+          <p className="font-title-sm text-xs text-on-surface-variant tracking-widest font-bold uppercase">{episodes.length} EPISODES AVAILABLE</p>
+        </div>
+        
         <Link 
           to={`/download/${source}/${encId}`}
-          className="text-emerald-500 hover:text-emerald-400 text-sm font-medium flex items-center gap-1"
+          className="bg-surface-container border border-outline px-4 py-2 rounded-full text-label-caps text-on-surface-variant hover:text-white hover:bg-surface-variant transition-colors uppercase font-bold text-xs flex items-center gap-2 w-fit"
         >
-          <Download className="w-4 h-4" /> Bulk Download
+          <span className="material-symbols-outlined text-[16px]">download</span>
+          Batch Download
         </Link>
       </div>
-
-      <div className="divide-y divide-[#262626] max-h-[600px] overflow-y-auto">
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
         {episodes.map((ep: any, idx) => {
           const num = ep.number;
           const name = ep.name || `Episode ${num}`;
           const serversInfo: ServerInfo[] = ep.servers || [];
-          const classified = serversInfo.map(s => 
-            classifyServerUrl(s.link || s.url || '', s.name)
-          );
-
-          const hasPlayable = classified.some(c => c.capability !== 'external');
+          const classified = serversInfo.map(s => classifyServerUrl(s.link || s.url || '', s.name));
           const downlodableServers = classified.filter(c => c.capability === 'native' && c.directUrl);
 
           const epId = source === 'animewitcher' ? (ep.doc_id || num) : num;
           const watchUrl = `/watch/${source}/${encId}/${epId}`;
 
           return (
-            <div key={idx} className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center hover:bg-[#141414] transition-colors">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-8 font-mono text-gray-500 text-right">{num}</div>
-                {source === 'animewitcher' && ep.thumb && (
-                  <div className="w-24 h-14 bg-black rounded overflow-hidden flex-shrink-0">
-                    <img src={ep.thumb} alt={name} className="w-full h-full object-cover" loading="lazy" />
-                  </div>
+            <Link key={idx} to={watchUrl} className="group flex flex-col gap-3">
+              <div className="w-full aspect-video rounded-xl overflow-hidden bg-surface-container-high relative border border-transparent group-hover:border-outline transition-colors shadow-lg">
+                {source === 'animewitcher' && ep.thumb ? (
+                  <img src={ep.thumb} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                ) : (
+                   <div className="w-full h-full bg-surface-container flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <span className="material-symbols-outlined text-outline-variant text-[48px]">movie</span>
+                   </div>
                 )}
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-200">{name}</h4>
-                  <div className="flex gap-2 mt-1 flex-wrap">
-                    {classified.filter(c => c.quality).map((c, i) => (
-                      <span key={i} className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                        c.quality?.includes('1080') ? 'bg-blue-500/20 text-blue-400' :
-                        c.quality?.includes('720') ? 'bg-green-500/20 text-green-400' :
-                        'bg-yellow-500/20 text-yellow-400'
-                      }`}>
-                        {c.quality}
-                      </span>
-                    ))}
-                  </div>
+                {/* Duration Badge */}
+                <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-sm">
+                  24m
+                </div>
+                {/* Play Overlay */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                   <span className="material-symbols-outlined text-white text-[48px] drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+                </div>
+                {/* Progress bar simulation for "Continue Watching" feel */}
+                <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/20">
+                  {idx === 0 && <div className="h-full bg-primary w-1/3"></div>}
                 </div>
               </div>
-
-              <div className="flex items-center gap-2 self-end sm:self-auto ml-12 sm:ml-0">
-                {hasPlayable ? (
-                  <Link
-                    to={watchUrl}
-                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                  >
-                    <Play className="w-3.5 h-3.5" fill="currentColor" /> Play
-                  </Link>
-                ) : (
-                  <button disabled className="flex items-center gap-1.5 bg-[#262626] text-gray-500 cursor-not-allowed px-3 py-1.5 rounded text-sm font-medium" title="No direct stream available">
-                    <Play className="w-3.5 h-3.5" /> Play
-                  </button>
-                )}
-
-                {downlodableServers.length > 0 ? (
-                  <a
-                    href={downlodableServers[0].directUrl as string}
-                    download
-                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                  >
-                    <Download className="w-3.5 h-3.5" /> 
-                    {downlodableServers.length > 1 ? `DL (${downlodableServers.length})` : 'DL'}
-                  </a>
-                ) : (
-                  <button disabled className="flex items-center gap-1.5 bg-[#262626] text-gray-500 cursor-not-allowed px-3 py-1.5 rounded text-sm font-medium" title="Download not available">
-                    <Download className="w-3.5 h-3.5" /> DL
-                  </button>
-                )}
-
-                {ep.url && (
-                  <a 
-                    href={ep.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="p-1.5 text-gray-400 hover:text-white bg-[#262626] hover:bg-[#333] rounded transition-colors"
-                    title="Open source page"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
+              
+              <div className="flex flex-col">
+                <h4 className="font-title-sm text-[16px] md:text-[18px] font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-1">
+                  {num}. {name}
+                </h4>
+                <p className="font-body-md text-sm text-on-surface-variant line-clamp-2 mt-1">
+                  {/* We don't have episode descriptions in the data schema, so we use a fallback or show quality tags */}
+                  {classified.filter(c => c.quality).slice(0, 3).map(c => c.quality).join(' • ') || 'Standard Definition'}
+                </p>
               </div>
-            </div>
+            </Link>
           );
         })}
-        {episodes.length === 0 && (
-          <div className="p-8 text-center text-gray-400 text-sm">No episodes indexed.</div>
-        )}
       </div>
-    </div>
+      
+      {episodes.length === 0 && (
+        <div className="p-12 text-center text-on-surface-variant bg-surface-container-low rounded-xl border border-outline">
+          No episodes found.
+        </div>
+      )}
+    </section>
   );
 }

@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile data",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "timestamp" },
+        "updatedAt": { "type": "string", "format": "timestamp" }
+      },
+      "required": ["email", "createdAt", "updatedAt"]
+    },
+    "ListItem": {
+      "title": "ListItem",
+      "description": "An item saved in a user's local list",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "source": { "type": "string" },
+        "title": { "type": "string" },
+        "poster": { "type": "string" },
+        "type": { "type": "string" },
+        "addedAt": { "type": "number", "format": "timestamp" }
+      },
+      "required": ["id", "source", "title", "addedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile document"
+    },
+    "users/{userId}/myList/{listItemId}": {
+      "schema": { "$ref": "#/entities/ListItem" },
+      "description": "Items in the user's list"
+    }
+  }
+}

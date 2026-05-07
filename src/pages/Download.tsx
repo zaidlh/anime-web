@@ -12,9 +12,11 @@ export default function Download() {
 
   if (!title) {
     return (
-      <div className="max-w-4xl mx-auto mt-20 text-center p-8 bg-[#1a1a1a] rounded-lg border border-[#262626]">
-        <h1 className="text-2xl font-bold text-white mb-4">Title Not Found</h1>
-        <Link to="/" className="text-blue-500 hover:underline">Return to Home</Link>
+      <div className="max-w-[1200px] mx-auto px-margin-edge py-xl">
+        <div className="text-center p-lg bg-surface-container rounded-xl ghost-border">
+          <h1 className="font-headline-md text-[24px] font-bold text-on-surface mb-sm">Title Not Found</h1>
+          <Link to="/" className="text-secondary hover:underline">Return to Home</Link>
+        </div>
       </div>
     );
   }
@@ -24,13 +26,12 @@ export default function Download() {
   const displayTitle = isAnime ? (t.english_title || t.name) : t.title;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col min-h-[80vh]">
-      <div className="mb-8">
-        <div className="text-sm text-gray-400 mb-2 flex items-center gap-2">
-          <Link to={`/title/${source}/${encodeURIComponent(id || '')}`} className="hover:text-white">← Back to {displayTitle}</Link>
-        </div>
-        <h1 className="text-3xl font-bold text-white mb-2">Bulk Download</h1>
-        <p className="text-gray-400">Select episodes to download sequentially or export an M3U playlist.</p>
+    <div className="max-w-[1200px] mx-auto px-margin-edge py-lg">
+      <div className="mb-sm">
+        <Link to={`/title/${source}/${encodeURIComponent(id || '')}`} className="text-secondary font-title-sm hover:underline flex items-center gap-xs font-bold w-fit">
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          Back to {displayTitle}
+        </Link>
       </div>
 
       <BulkDownloadManager 

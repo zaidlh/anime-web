@@ -1,10 +1,13 @@
 import React from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { Search, Film, Tv, Info } from 'lucide-react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/useAuth';
 
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,49 +16,101 @@ export default function Layout() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-[#0f0f0f] text-[#e5e5e5]">
-      <header className="sticky top-0 z-50 bg-[#141414]/90 backdrop-blur-md border-b border-[#262626]">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Link to="/" className="text-xl font-bold text-white flex items-center gap-2">
-            <Film className="w-6 h-6 text-blue-500" />
-            <span className="hidden sm:inline">Cloudstream Catalog</span>
-          </Link>
-          
-          <form onSubmit={handleSearch} className="flex-1 max-w-md relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="search"
-              placeholder="Search anime or dramas..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#262626] rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-blue-500 transition-colors placeholder-gray-500"
-            />
-          </form>
+  const navLinks = [
+    { name: 'Home', path: '/', icon: 'home' },
+    { name: 'Library', path: '/mylist', icon: 'collections_bookmark' },
+    { name: 'Search', path: '/search', icon: 'search' },
+    { name: 'Profile', path: '/profile', icon: 'person' }
+  ];
 
-          <nav className="flex items-center gap-4 text-sm font-medium">
-            <Link to="/browse/animewitcher" className="hidden sm:flex items-center gap-1 hover:text-white transition-colors">
-              <Tv className="w-4 h-4" /> Anime
+  return (
+    <div className="min-h-screen flex flex-col bg-background text-on-surface font-body-md overflow-x-hidden selection:bg-primary/30 selection:text-white pb-20 md:pb-0">
+      {/* TopNavBar */}
+      <header className="bg-background/80 docked full-width top-0 sticky backdrop-blur-xl border-b border-surface-variant z-50">
+        <div className="flex justify-between items-center w-full px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
+          <div className="flex items-center gap-md">
+            <button className="md:hidden flex items-center justify-center p-2 -ml-2 text-on-surface hover:bg-surface-variant rounded-full transition-colors">
+              <span className="material-symbols-outlined text-[24px]">menu</span>
+            </button>
+            <Link to="/" className="font-display-lg text-[22px] md:text-[24px] font-black tracking-tighter text-primary uppercase">
+              Cloudstream
             </Link>
-            <Link to="/browse/asia2tv" className="hidden sm:flex items-center gap-1 hover:text-white transition-colors">
-              <Film className="w-4 h-4" /> Drama
+            <nav className="hidden md:flex items-center gap-md ml-lg">
+              <Link className="text-on-surface-variant font-medium hover:text-on-surface transition-colors font-title-sm text-title-sm" to="/browse/animewitcher">Anime</Link>
+              <Link className="text-on-surface-variant font-medium hover:text-on-surface transition-colors font-title-sm text-title-sm" to="/browse/asia2tv">Drama</Link>
+              <Link className="text-on-surface-variant font-medium hover:text-on-surface transition-colors font-title-sm text-title-sm" to="/mylist">My List</Link>
+              <Link className="text-on-surface-variant font-medium hover:text-on-surface transition-colors font-title-sm text-title-sm" to="/settings">Settings</Link>
+            </nav>
+          </div>
+          <div className="flex items-center gap-2">
+            <form onSubmit={handleSearch} className="hidden sm:flex items-center bg-surface-container border border-surface-variant hover:border-outline transition-colors rounded-full px-sm py-xs">
+              <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+              <input
+                type="search"
+                className="bg-transparent border-none focus:ring-0 text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant w-48 ml-2 focus:outline-none"
+                placeholder="Search titles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
+            <Link to="/search" className="sm:hidden hover:bg-surface-variant transition-all duration-200 p-2 text-on-surface-variant hover:text-on-surface rounded-full flex items-center justify-center">
+              <span className="material-symbols-outlined text-[24px]" title="Search">search</span>
             </Link>
-            <Link to="/about" className="hover:text-white transition-colors">
-              <Info className="w-4 h-4 sm:hidden" />
-              <span className="hidden sm:inline">About</span>
+            <Link to="/profile" className="hidden md:flex hover:bg-surface-variant transition-all duration-200 p-2 text-on-surface-variant hover:text-on-surface rounded-full items-center justify-center overflow-hidden">
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="Profile" className="w-[28px] h-[28px] rounded-full object-cover" />
+              ) : (
+                <span className="material-symbols-outlined text-[24px]" title="Profile" data-icon="account_circle">account_circle</span>
+              )}
             </Link>
-          </nav>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 w-full pb-12">
+      <main className="flex-1 w-full max-w-screen-2xl mx-auto">
         <Outlet />
       </main>
 
-      <footer className="border-t border-[#262626] bg-[#141414] py-8 text-center text-sm text-[#a3a3a3]">
-        <div className="max-w-7xl mx-auto px-4">
-          <p>© {new Date().getFullYear()} Cloudstream Catalog.</p>
-          <p className="mt-2 text-xs">Videos are fetched from third-party sources. We do not host any media.</p>
+      {/* Bottom Navigation for Mobile */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-surface-variant z-50 pb-safe">
+        <div className="flex items-center justify-around py-2 px-2">
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+            return (
+              <Link
+                key={link.name}
+                to={link.path}
+                className={`flex flex-col items-center justify-center p-2 min-w-[64px] transition-colors ${
+                  isActive ? 'text-primary' : 'text-on-surface-variant'
+                }`}
+              >
+                <span 
+                  className="material-symbols-outlined text-[24px] mb-1 transition-transform"
+                  style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                >
+                  {link.icon}
+                </span>
+                <span className={`text-[10px] font-title-sm tracking-wide ${isActive ? 'font-bold' : 'font-medium'}`}>
+                  {link.name}
+                </span>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
+
+      <footer className="hidden md:block bg-surface-container-lowest w-full border-t border-surface-variant mt-xl">
+        <div className="w-full py-xl px-margin-edge flex flex-col md:flex-row justify-between items-center gap-md max-w-screen-2xl mx-auto">
+          <div className="flex flex-col gap-xs items-center md:items-start text-center md:text-left flex-1 min-w-0 pr-8">
+            <span className="font-title-sm text-title-sm font-bold text-on-surface whitespace-nowrap">Cloudstream Catalog</span>
+            <p className="font-body-md text-sm text-on-surface-variant w-full opacity-60">© {new Date().getFullYear()} Cloudstream Catalog. Legal Disclaimer: This site does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
+          </div>
+          <nav className="flex flex-wrap justify-center gap-md shrink-0">
+            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/terms">Terms</Link>
+            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/privacy">Privacy</Link>
+            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/dmca">DMCA</Link>
+            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/about">About</Link>
+          </nav>
         </div>
       </footer>
     </div>

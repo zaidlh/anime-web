@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Download, Clipboard, FileText, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { SourceType } from '../lib/data';
 import { classifyServerUrl, getDownloadableServers } from '../lib/servers';
 
@@ -12,20 +11,33 @@ interface BulkDownloadManagerProps {
 export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownloadManagerProps) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [qualityPref, setQualityPref] = useState<'best'|'1080p'|'720p'|'480p'>('best');
+  const [downloadState, setDownloadState] = useState<'idle' | 'downloading' | 'done'>('idle');
+  const [downloadedCount, setDownloadedCount] = useState(0);
   
   const downloadableMap = new Map<number, string | null>();
+  const qualitiesMap = new Map<number, string[]>();
   
   episodes.forEach((ep) => {
     const serversInfo = ep.servers || [];
     const classified = serversInfo.map((s: any) => classifyServerUrl(s.link || s.url || '', s.name));
     const dlServers = getDownloadableServers(classified);
     
+    qualitiesMap.set(ep.number, dlServers.map(s => s.quality).filter(Boolean) as string[]);
+
     if (dlServers.length > 0) {
       let url = dlServers[0].directUrl;
+      const sorted = [...dlServers].sort((a,b) => {
+         const qA = a.quality ? parseInt(a.quality) : 0;
+         const qB = b.quality ? parseInt(b.quality) : 0;
+         return qB - qA;
+      });
+
       if (qualityPref !== 'best') {
-        const pref = dlServers.find(s => s.quality?.includes(qualityPref));
+        const pref = sorted.find(s => s.quality?.includes(qualityPref));
         if (pref) url = pref.directUrl;
-        else if (dlServers.length > 0) url = dlServers[0].directUrl;
+        else if (sorted.length > 0) url = sorted[0].directUrl;
+      } else if (sorted.length > 0) {
+        url = sorted[0].directUrl;
       }
       downloadableMap.set(ep.number, url);
     } else {
@@ -33,8 +45,10 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
     }
   });
 
+  const allSelectableCount = episodes.filter(e => downloadableMap.get(e.number)).length;
+
   const toggleAll = () => {
-    if (selected.size === episodes.filter(e => downloadableMap.get(e.number)).length) {
+    if (selected.size === allSelectableCount) {
       setSelected(new Set());
     } else {
       const allSelectable = episodes.filter(e => downloadableMap.get(e.number)).map(e => e.number);
@@ -63,6 +77,22 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
     alert('Copied ' + selected.size + ' links to clipboard.');
   };
 
+  const handleShareLinks = async () => {
+    const urls = getSelectedUrls().map(x => x.url).join('\n');
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${seriesTitle} Episodes`,
+          text: urls,
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      alert('Web Share API is not supported on this browser. Use "Copy Links" instead.');
+    }
+  };
+
   const handleGenerateM3U = () => {
     let m3u = '#EXTM3U\n';
     getSelectedUrls().forEach(({num, url}) => {
@@ -77,9 +107,6 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
     URL.revokeObjectURL(u);
   };
 
-  const [downloadState, setDownloadState] = useState<'idle' | 'downloading' | 'done'>('idle');
-  const [downloadedCount, setDownloadedCount] = useState(0);
-
   const handleDownloadSelected = async () => {
     if (selected.size === 0) return;
     setDownloadState('downloading');
@@ -91,67 +118,109 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
         const a = document.createElement('a');
         a.href = item.url;
         a.download = `${seriesTitle.replace(/[^a-z0-9]/gi, '_')}_EP${item.num}.mp4`;
-        a.target = '_blank'; // Required for cross-origin downloads sometimes
+        a.rel = 'noreferrer';
+        a.referrerPolicy = 'no-referrer';
+        a.target = '_blank';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         setDownloadedCount(i + 1);
-        await new Promise(r => setTimeout(r, 1000)); // 1s delay
+        await new Promise(r => setTimeout(r, 1000));
     }
     setDownloadState('done');
     setTimeout(() => setDownloadState('idle'), 3000);
   };
 
   return (
-    <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg overflow-hidden flex flex-col">
-      <div className="p-4 bg-emerald-900/20 border-b border-[#262626] text-sm text-emerald-200">
-        <strong className="text-emerald-400">Note:</strong> Downloads work best for Pixeldrain and direct MP4 links. Some hosts block cross-origin downloads. If a download fails silently, use 'Copy Links' and paste into an external download manager (like IDM or aria2).
-      </div>
-      
-      <div className="flex-1 overflow-y-auto max-h-[60vh]">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-[#141414] sticky top-0 border-b border-[#262626] z-10">
-            <tr>
-              <th className="p-4 w-12">
+    <>
+      <section className="relative mb-xl rounded-xl overflow-hidden ghost-border bg-surface-container">
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-surface-container to-transparent z-0"></div>
+        <div className="relative z-10 p-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
+          <div>
+            <h1 className="font-display-lg text-[48px] font-black text-on-surface mb-xs leading-none">{seriesTitle}</h1>
+            <p className="font-title-sm text-primary uppercase tracking-widest font-bold">Bulk Download</p>
+          </div>
+          <div className="flex flex-col gap-xs min-w-[240px]">
+            <label className="font-label-caps text-outline uppercase font-bold text-[12px] tracking-wider">Preferred Quality</label>
+            <div className="relative">
+              <select 
+                className="w-full bg-surface-container-lowest ghost-border rounded-lg px-md py-sm font-body-md text-on-surface appearance-none focus:border-secondary-container outline-none transition-colors"
+                value={qualityPref}
+                onChange={(e) => setQualityPref(e.target.value as any)}
+              >
+                <option value="best">Best Available</option>
+                <option value="1080p">Full HD (1080p)</option>
+                <option value="720p">HD (720p)</option>
+                <option value="480p">SD (480p)</option>
+              </select>
+              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="ghost-border rounded-xl bg-surface-container-lowest overflow-hidden mb-32">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-surface-container-high border-b border-outline-variant">
+              <th className="p-md w-12 text-center">
                 <input 
-                  type="checkbox" 
-                  className="rounded border-[#262626] bg-[#0f0f0f] w-4 h-4"
-                  checked={selected.size > 0 && selected.size === episodes.filter(e => downloadableMap.get(e.number)).length}
+                  type="checkbox"
+                  checked={selected.size > 0 && selected.size === allSelectableCount}
                   onChange={toggleAll}
+                  className="w-5 h-5 rounded border-outline bg-surface-container-lowest text-primary-container focus:ring-primary-container"
                 />
               </th>
-              <th className="p-4 text-gray-400 font-medium">Ep #</th>
-              <th className="p-4 text-gray-400 font-medium">Title</th>
-              <th className="p-4 text-gray-400 font-medium text-right">Status</th>
+              <th className="p-md font-label-caps text-outline uppercase tracking-wider text-[12px] font-bold">#</th>
+              <th className="p-md font-label-caps text-outline uppercase tracking-wider text-[12px] font-bold">Episode Name</th>
+              <th className="p-md font-label-caps text-outline uppercase tracking-wider text-[12px] font-bold">Available Qualities</th>
+              <th className="p-md font-label-caps text-outline uppercase tracking-wider text-[12px] font-bold">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#262626]">
+          <tbody className="font-body-md text-body-md">
             {episodes.map(ep => {
               const url = downloadableMap.get(ep.number);
               const isSelected = selected.has(ep.number);
-              
+              const qualities = qualitiesMap.get(ep.number) || [];
+              const numStr = ep.number.toString().padStart(2, '0');
+
               return (
-                <tr key={ep.number} className={`hover:bg-[#141414] ${!url ? 'opacity-50' : ''}`}>
-                  <td className="p-4">
+                <tr key={ep.number} className={`border-b border-outline-variant hover:bg-surface-variant/20 transition-colors ${!url ? 'opacity-50' : ''}`}>
+                  <td className="p-md text-center">
                     <input 
-                      type="checkbox" 
+                      type="checkbox"
                       disabled={!url}
                       checked={isSelected}
                       onChange={() => toggleIndividual(ep.number)}
-                      className="rounded border-[#262626] bg-[#0f0f0f] w-4 h-4 disabled:opacity-30"
+                      className="w-5 h-5 rounded border-outline bg-surface-container-lowest text-primary-container focus:ring-primary-container disabled:opacity-30"
                     />
                   </td>
-                  <td className="p-4 font-mono text-gray-400">{ep.number}</td>
-                  <td className="p-4 text-gray-200">{ep.name || `Episode ${ep.number}`}</td>
-                  <td className="p-4 text-right">
+                  <td className="p-md text-on-surface-variant">{numStr}</td>
+                  <td className="p-md text-on-surface font-semibold">{ep.name || `Episode ${numStr}`}</td>
+                  <td className="p-md">
+                    <div className="flex flex-wrap gap-xs">
+                      {qualities.length > 0 ? qualities.map((q, i) => (
+                        <span key={i} className={`px-xs py-0.5 rounded-xl font-label-caps text-[12px] font-bold uppercase ${
+                          q.includes('1080') ? 'bg-primary-container text-white' : 'bg-surface-variant text-on-surface-variant'
+                        }`}>
+                          {q}
+                        </span>
+                      )) : (
+                         <span className="text-on-surface-variant text-[12px]">None</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="p-md">
                     {url ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-medium">
-                        <CheckCircle2 className="w-3 h-3" /> Available
-                      </span>
+                      <div className="flex items-center gap-xs text-tertiary">
+                        <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                        <span className="font-label-caps text-[12px] font-bold uppercase">Available</span>
+                      </div>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-gray-500 text-xs" title="No direct download">
-                        <AlertCircle className="w-3 h-3" /> Unavailable
-                      </span>
+                       <div className="flex items-center gap-xs text-on-surface-variant">
+                        <span className="material-symbols-outlined text-[18px]">cancel</span>
+                        <span className="font-label-caps text-[12px] font-bold uppercase">Unavailable</span>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -161,56 +230,64 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
         </table>
       </div>
 
-      <div className="bg-[#141414] p-4 border-t border-[#262626] flex flex-col md:flex-row gap-4 justify-between items-center z-20">
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <label className="text-sm text-gray-400">Quality Pref:</label>
-          <select 
-            value={qualityPref} 
-            onChange={(e) => setQualityPref(e.target.value as any)}
-            className="bg-[#0f0f0f] border border-[#262626] rounded px-3 py-1.5 text-sm outline-none w-32"
-          >
-            <option value="best">Best Auth</option>
-            <option value="1080p">1080p</option>
-            <option value="720p">720p</option>
-            <option value="480p">480p</option>
-          </select>
-          <span className="text-sm font-medium text-gray-300 ml-4">
-            {selected.size} selected
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto flex-wrap justify-end">
-          <button 
-            onClick={handleCopyLinks}
-            disabled={selected.size === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-[#262626] hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed rounded-md text-sm font-medium transition-colors"
-          >
-            <Clipboard className="w-4 h-4" /> Copy Links
-          </button>
-          
-          <button 
-            onClick={handleGenerateM3U}
-            disabled={selected.size === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-[#262626] hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed rounded-md text-sm font-medium transition-colors"
-          >
-            <FileText className="w-4 h-4" /> Export M3U
-          </button>
-
-          <button 
-            onClick={handleDownloadSelected}
-            disabled={selected.size === 0 || downloadState === 'downloading'}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-md text-white text-sm font-medium transition-colors"
-          >
-            {downloadState === 'downloading' ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> {downloadedCount}/{selected.size}</>
-            ) : downloadState === 'done' ? (
-              <><CheckCircle2 className="w-4 h-4" /> Done!</>
-            ) : (
-              <><Download className="w-4 h-4" /> Download Selected</>
+      {/* Sticky Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container/80 backdrop-blur-xl border-t border-outline-variant py-md px-margin-edge">
+        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-md">
+          <div className="flex items-center gap-md">
+            <div className="flex flex-col">
+              <span className="font-label-caps text-[12px] font-bold text-outline uppercase tracking-wider">Selected</span>
+              <span className="font-headline-md text-[24px] font-bold text-on-surface">{selected.size} Episodes</span>
+            </div>
+            {downloadState !== 'idle' && (
+              <>
+                 <div className="h-8 w-[1px] bg-outline-variant mx-sm"></div>
+                 <div className="flex flex-col">
+                    <span className="font-label-caps text-[12px] font-bold text-outline uppercase tracking-wider">Status</span>
+                    {downloadState === 'downloading' ? (
+                       <span className="font-headline-md text-[24px] font-bold text-secondary animate-pulse">Downloading {downloadedCount}/{selected.size}...</span>
+                    ) : (
+                       <span className="font-headline-md text-[24px] font-bold text-tertiary">Downloads Completed</span>
+                    )}
+                 </div>
+              </>
             )}
-          </button>
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-sm">
+            <button 
+              onClick={handleShareLinks}
+              disabled={selected.size === 0}
+              className="ghost-border px-md py-sm rounded-lg font-title-sm font-bold text-on-surface-variant hover:bg-surface-variant/30 transition-all flex items-center gap-xs disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[20px]">share</span>
+              Share to ADM
+            </button>
+            <button 
+              onClick={handleCopyLinks}
+              disabled={selected.size === 0}
+              className="ghost-border px-md py-sm rounded-lg font-title-sm font-bold text-on-surface-variant hover:bg-surface-variant/30 transition-all flex items-center gap-xs disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[20px]">content_copy</span>
+              Copy Links
+            </button>
+            <button 
+               onClick={handleGenerateM3U}
+               disabled={selected.size === 0}
+              className="ghost-border px-md py-sm rounded-lg font-title-sm font-bold text-on-surface-variant hover:bg-surface-variant/30 transition-all flex items-center gap-xs disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[20px]">file_export</span>
+              Export M3U
+            </button>
+            <button 
+               onClick={handleDownloadSelected}
+               disabled={selected.size === 0 || downloadState === 'downloading'}
+              className="bg-tertiary-container hover:bg-tertiary transition-colors px-lg py-sm rounded-lg font-title-sm font-bold text-on-tertiary-container flex items-center gap-sm shadow-lg shadow-tertiary-container/20 disabled:opacity-50 disabled:shadow-none"
+            >
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>download</span>
+              Download Selected ({selected.size})
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
