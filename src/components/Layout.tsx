@@ -33,7 +33,7 @@ export default function Layout() {
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
             <Link to="/" className="font-display-lg text-[22px] md:text-[24px] font-black tracking-tighter text-primary uppercase">
-              Cloudstream
+              ANIMAX
             </Link>
             <nav className="hidden md:flex items-center gap-md ml-lg">
               <Link className="text-on-surface-variant font-medium hover:text-on-surface transition-colors font-title-sm text-title-sm" to="/browse/animewitcher">Anime</Link>
@@ -102,8 +102,8 @@ export default function Layout() {
       <footer className="hidden md:block bg-surface-container-lowest w-full border-t border-surface-variant mt-xl">
         <div className="w-full py-xl px-margin-edge flex flex-col md:flex-row justify-between items-center gap-md max-w-screen-2xl mx-auto">
           <div className="flex flex-col gap-xs items-center md:items-start text-center md:text-left flex-1 min-w-0 pr-8">
-            <span className="font-title-sm text-title-sm font-bold text-on-surface whitespace-nowrap">Cloudstream Catalog</span>
-            <p className="font-body-md text-sm text-on-surface-variant w-full opacity-60">© {new Date().getFullYear()} Cloudstream Catalog. Legal Disclaimer: This site does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
+            <span className="font-title-sm text-title-sm font-bold text-on-surface whitespace-nowrap">Animax Catalog</span>
+            <p className="font-body-md text-sm text-on-surface-variant w-full opacity-60">© {new Date().getFullYear()} Animax Catalog. Legal Disclaimer: This site does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
           </div>
           <nav className="flex flex-wrap justify-center gap-md shrink-0">
             <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/terms">Terms</Link>

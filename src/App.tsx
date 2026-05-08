@@ -21,30 +21,33 @@ import Terms from './pages/Terms';
 import NotFound from './pages/NotFound';
 
 import { AuthProvider } from './lib/useAuth';
+import { DataProvider } from './lib/data';
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="search" element={<Search />} />
-            <Route path="browse/:source" element={<Browse />} />
-            <Route path="title/:source/:id" element={<TitleDetail />} />
-            <Route path="watch/:source/:id/:episode" element={<Watch />} />
-            <Route path="download/:source/:id" element={<Download />} />
-            <Route path="about" element={<About />} />
-            <Route path="mylist" element={<MyList />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="dmca" element={<DMCA />} />
-            <Route path="privacy" element={<Privacy />} />
-            <Route path="terms" element={<Terms />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <DataProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="search" element={<Search />} />
+              <Route path="browse/:source" element={<Browse />} />
+              <Route path="title/:source/:id" element={<TitleDetail />} />
+              <Route path="watch/:source/:id/:episode" element={<Watch />} />
+              <Route path="download/:source/:id" element={<Download />} />
+              <Route path="about" element={<About />} />
+              <Route path="mylist" element={<MyList />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="dmca" element={<DMCA />} />
+              <Route path="privacy" element={<Privacy />} />
+              <Route path="terms" element={<Terms />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </DataProvider>
     </AuthProvider>
   );
 }

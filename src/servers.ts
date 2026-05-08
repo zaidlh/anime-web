@@ -9,7 +9,7 @@ export interface ClassifiedServer {
   originalUrl: string;
 }
 
-export function classifyServerUrl(url: string, name: string): ClassifiedServer {
+export function classifyServerUrl(url: string, name: string, quality: string | null = null): ClassifiedServer {
   const lower = url.toLowerCase();
   const lowerName = name.toLowerCase();
 
@@ -17,7 +17,7 @@ export function classifyServerUrl(url: string, name: string): ClassifiedServer {
   const pdMatch = url.match(/pixeldrain\.com\/(?:u|api\/file)\/([a-zA-Z0-9_-]+)/i);
   if (pdMatch) {
     return {
-      name, quality: null, capability: 'native',
+      name, quality, capability: 'native',
       directUrl: `https://pixeldrain.com/api/file/${pdMatch[1]}`, 
       embedUrl: null, originalUrl: url,
     };
@@ -26,7 +26,7 @@ export function classifyServerUrl(url: string, name: string): ClassifiedServer {
   // Bunny / MediaDelivery
   if (lowerName.includes('bunny') || lower.includes('mediadelivery.net') || lower.includes('bunnycdn')) {
     return {
-      name, quality: null, capability: 'iframe',
+      name, quality, capability: 'iframe',
       directUrl: null, embedUrl: url, originalUrl: url,
     };
   }
@@ -34,7 +34,7 @@ export function classifyServerUrl(url: string, name: string): ClassifiedServer {
   // Ok.ru
   if (lower.includes('ok.ru') || lowerName.includes('okru')) {
     return {
-      name, quality: null, capability: 'iframe',
+      name, quality, capability: 'iframe',
       directUrl: null, embedUrl: url, originalUrl: url,
     };
   }
@@ -42,7 +42,7 @@ export function classifyServerUrl(url: string, name: string): ClassifiedServer {
   // YouTube (for testing iframe capability easily)
   if (lower.includes('youtube.com/embed') || lowerName.includes('youtube')) {
     return {
-      name, quality: null, capability: 'iframe',
+      name, quality, capability: 'iframe',
       directUrl: null, embedUrl: url, originalUrl: url,
     };
   }
@@ -50,7 +50,7 @@ export function classifyServerUrl(url: string, name: string): ClassifiedServer {
   // Direct video files
   if (/\.(mp4|mkv|webm)(\?.*)?$/i.test(lower)) {
     return {
-      name, quality: null, capability: 'native',
+      name, quality, capability: 'native',
       directUrl: url, embedUrl: null, originalUrl: url,
     };
   }
@@ -58,7 +58,7 @@ export function classifyServerUrl(url: string, name: string): ClassifiedServer {
   // HLS
   if (/\.m3u8(\?.*)?$/i.test(lower)) {
     return {
-      name, quality: null, capability: 'native',
+      name, quality, capability: 'native',
       directUrl: url, embedUrl: null, originalUrl: url,
     };
   }
@@ -66,13 +66,13 @@ export function classifyServerUrl(url: string, name: string): ClassifiedServer {
   // Mediafire direct
   if (lower.includes('mediafire.com') && /download/i.test(lower)) {
     return {
-      name, quality: null, capability: 'native',
+      name, quality, capability: 'native',
       directUrl: url, embedUrl: null, originalUrl: url,
     };
   }
 
   return {
-    name, quality: null, capability: 'external',
+    name, quality, capability: 'external',
     directUrl: null, embedUrl: null, originalUrl: url,
   };
 }

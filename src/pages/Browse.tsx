@@ -1,12 +1,20 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getAllTitles } from '../lib/data';
+import { useAllTitles } from '../lib/data';
 import { PosterCard } from '../components/PosterCard';
 
 export default function Browse() {
   const { source } = useParams();
-  const { animewitcher, asia2tv } = getAllTitles();
+  const { animewitcher, asia2tv, loading } = useAllTitles();
   
+  if (loading) {
+    return (
+      <div className="w-full h-[70vh] flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   if (source !== 'animewitcher' && source !== 'asia2tv') {
     return <div className="text-center py-20 font-headline-md font-bold text-on-surface">Source not found.</div>;
   }

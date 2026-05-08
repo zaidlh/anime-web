@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ClassifiedServer, getBestServer } from '../lib/servers';
+import { ClassifiedServer, getBestServer } from '../servers';
 
 interface VideoPlayerProps {
   servers: ClassifiedServer[];
@@ -62,35 +62,23 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (!selectedServer) {
-    return (
-      <div className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow flex flex-col items-center justify-center p-8 text-center">
-        <div className="mb-4 text-on-surface-variant">This episode is only available via external hosts.</div>
-        <div className="flex flex-wrap gap-4 justify-center">
-          {servers.map((s, i) => (
-            <a
-              key={i}
-              href={s.originalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-surface-container-high hover:bg-surface-variant px-4 py-2 rounded-lg transition-colors font-bold text-on-surface"
-            >
-              Open on {s.name} <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-            </a>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   const nativeServers = servers.filter(s => s.capability === 'native');
   const iframeServers = servers.filter(s => s.capability === 'iframe');
-  const allServers = [...nativeServers, ...iframeServers];
+  const externalServers = servers.filter(s => s.capability === 'external');
+  const allServers = [...nativeServers, ...iframeServers, ...externalServers];
 
   return (
     <div className="flex flex-col gap-lg">
       <section className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20">
-        {selectedServer.capability === 'native' ? (
+        {!selectedServer ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center backdrop-blur-sm bg-black/60">
+            <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-4">open_in_new</span>
+            <div className="mb-4 text-on-surface font-headline-md font-bold">External Stream Only</div>
+            <div className="text-on-surface-variant max-w-md">
+              This episode does not have a native web stream. Please select an external server from the list below to open it in a new tab.
+            </div>
+          </div>
+        ) : selectedServer.capability === 'native' ? (
           <>
             {videoError && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 text-center p-6 backdrop-blur-sm">
@@ -114,7 +102,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover outline-none"
               onError={(e) => {
-                console.error("Video error:", e);
+                console.error("Video error:", e.type);
                 setVideoError("The video stream could not be loaded. Please try selecting a different server.");
               }}
             >
@@ -190,11 +178,15 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
         <h3 className="font-label-caps text-label-caps text-primary/70 tracking-[0.2em] uppercase mb-sm font-bold">Select Streaming Server</h3>
         <div className="flex flex-wrap gap-md">
           {allServers.map((s, i) => {
-            const isSelected = selectedServer.name === s.name && selectedServer.quality === s.quality;
+            const isSelected = selectedServer && selectedServer.name === s.name && selectedServer.quality === s.quality;
             return (
               <button
                 key={`${s.name}-${s.quality}-${i}`}
                 onClick={() => {
+                  if (s.capability === 'external') {
+                    window.open(s.originalUrl, '_blank', 'noopener,noreferrer');
+                    return;
+                  }
                   setVideoError(null);
                   if (videoRef.current) {
                     const cTime = videoRef.current.currentTime;
@@ -220,12 +212,12 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
                   isSelected ? 'bg-secondary-container' : 'bg-surface-container-highest group-hover:bg-primary/20 group-hover:text-primary'
                 }`}>
                    <span className={`material-symbols-outlined ${isSelected ? 'text-white' : ''}`}>
-                      {s.capability === 'native' ? 'dns' : 'cloud_queue'}
+                      {s.capability === 'native' ? 'dns' : s.capability === 'iframe' ? 'cloud_queue' : 'open_in_new'}
                    </span>
                 </div>
                 <div className="text-left">
                   <p className={`font-label-caps text-[10px] uppercase font-bold ${isSelected ? 'text-secondary/60' : 'text-outline'}`}>
-                    {s.capability === 'native' ? 'Direct Source' : 'External Player'}
+                    {s.capability === 'native' ? 'Direct Source' : s.capability === 'iframe' ? 'Embed Player' : 'External Link'}
                   </p>
                   <p className="font-title-sm font-bold">{s.name} {s.quality && <span className="font-normal opacity-80">- {s.quality}</span>}</p>
                 </div>

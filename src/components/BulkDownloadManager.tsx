@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SourceType } from '../lib/data';
-import { classifyServerUrl, getDownloadableServers } from '../lib/servers';
+import { classifyServerUrl, getDownloadableServers } from '../servers';
 
 interface BulkDownloadManagerProps {
   source: SourceType;
@@ -10,7 +10,7 @@ interface BulkDownloadManagerProps {
 
 export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownloadManagerProps) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [qualityPref, setQualityPref] = useState<'best'|'1080p'|'720p'|'480p'>('best');
+  const [qualityPref, setQualityPref] = useState<'best'|'1080p'|'720p'|'480p'>('1080p');
   const [downloadState, setDownloadState] = useState<'idle' | 'downloading' | 'done'>('idle');
   const [downloadedCount, setDownloadedCount] = useState(0);
   
@@ -19,7 +19,7 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
   
   episodes.forEach((ep) => {
     const serversInfo = ep.servers || [];
-    const classified = serversInfo.map((s: any) => classifyServerUrl(s.link || s.url || '', s.name));
+    const classified = serversInfo.map((s: any) => classifyServerUrl(s.link || s.url || '', s.name, s.quality || null));
     const dlServers = getDownloadableServers(classified);
     
     qualitiesMap.set(ep.number, dlServers.map(s => s.quality).filter(Boolean) as string[]);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getTitleById, SourceType } from '../lib/data';
+import { useTitleById, SourceType } from '../lib/data';
 import { decodeBase64Url } from '../lib/utils';
 import { BulkDownloadManager } from '../components/BulkDownloadManager';
 
@@ -8,7 +8,15 @@ export default function Download() {
   const { source, id } = useParams<{ source: string; id: string }>();
   
   const decodedId = source === 'animewitcher' ? decodeURIComponent(id || '') : decodeBase64Url(id || '');
-  const title = getTitleById(source as SourceType, decodedId);
+  const { title, loading } = useTitleById(source as SourceType, decodedId);
+
+  if (loading) {
+    return (
+      <div className="w-full h-[70vh] flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!title) {
     return (

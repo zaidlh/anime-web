@@ -1,11 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getAllTitles } from '../lib/data';
+import { useAllTitles } from '../lib/data';
 import { PosterCard } from '../components/PosterCard';
 
 export default function Home() {
-  const { animewitcher, asia2tv } = getAllTitles();
+  const { animewitcher, asia2tv, loading } = useAllTitles();
   
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   const animes = animewitcher.slice(0, 12);
   const dramas = asia2tv.slice(0, 12);
   

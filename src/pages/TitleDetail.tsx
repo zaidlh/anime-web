@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getTitleById, SourceType } from '../lib/data';
+import { useTitleById, SourceType } from '../lib/data';
 import { decodeBase64Url } from '../lib/utils';
 import { EpisodeList } from '../components/EpisodeList';
 import { useIsInList, addToList, removeFromList } from '../lib/list';
@@ -9,7 +9,7 @@ export default function TitleDetail() {
   const { source, id } = useParams<{ source: string; id: string }>();
   
   const decodedId = source === 'animewitcher' ? decodeURIComponent(id || '') : decodeBase64Url(id || '');
-  const title = getTitleById(source as SourceType, decodedId);
+  const { title, loading } = useTitleById(source as SourceType, decodedId);
 
   const isAnime = source === 'animewitcher';
   const t = title as any;
@@ -30,6 +30,14 @@ export default function TitleDetail() {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!title) {
     return (

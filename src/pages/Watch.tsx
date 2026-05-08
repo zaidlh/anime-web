@@ -1,18 +1,26 @@
 import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getEpisodeByNumber, SourceType } from '../lib/data';
+import { useEpisodeByNumber, SourceType } from '../lib/data';
 import { decodeBase64Url } from '../lib/utils';
 import { VideoPlayer } from '../components/VideoPlayer';
-import { classifyServerUrl } from '../lib/servers';
+import { classifyServerUrl } from '../servers';
 
 export default function Watch() {
   const { source, id, episode } = useParams<{ source: string; id: string; episode: string }>();
   
   const decodedId = source === 'animewitcher' ? decodeURIComponent(id || '') : decodeBase64Url(id || '');
   
-  const data = getEpisodeByNumber(source as SourceType, decodedId, episode || '');
+  const data = useEpisodeByNumber(source as SourceType, decodedId, episode || '');
 
-  if (!data) {
+  if (data?.loading) {
+    return (
+      <div className="w-full h-[70vh] flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!data || !data.title) {
      return (
       <div className="max-w-[1200px] mx-auto px-margin-edge py-xl">
         <div className="text-center p-lg bg-surface-container rounded-xl ghost-border">
@@ -30,7 +38,7 @@ export default function Watch() {
 
   const servers = useMemo(() => {
     const rawServers = ep.servers || [];
-    return rawServers.map((s: any) => classifyServerUrl(s.link || s.url || '', s.name));
+    return rawServers.map((s: any) => classifyServerUrl(s.link || s.url || '', s.name, s.quality || null));
   }, [ep.servers]);
 
   const allEpisodes = title.episodes;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { AnimeWitcherEpisode, Asia2TVEpisode, ServerInfo, SourceType } from '../lib/data';
-import { classifyServerUrl } from '../lib/servers';
+import { classifyServerUrl } from '../servers';
 import { encodeBase64Url } from '../lib/utils';
 
 interface EpisodeListProps {
@@ -41,7 +41,7 @@ export function EpisodeList({ source, titleId, episodes }: EpisodeListProps) {
           const num = ep.number;
           const name = ep.name || `Episode ${num}`;
           const serversInfo: ServerInfo[] = ep.servers || [];
-          const classified = serversInfo.map(s => classifyServerUrl(s.link || s.url || '', s.name));
+          const classified = serversInfo.map((s: any) => classifyServerUrl(s.link || s.url || '', s.name, s.quality || null));
           const downlodableServers = classified.filter(c => c.capability === 'native' && c.directUrl);
 
           const epId = source === 'animewitcher' ? (ep.doc_id || num) : num;
