@@ -131,9 +131,9 @@ export default function Search() {
       <section className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-[20px] font-bold text-white tracking-wide">Popular Genres</h2>
-          <button className="text-[#ec4a45] text-[13px] font-bold hover:underline uppercase tracking-wide">
+          <Link to="/browse" className="text-[#ec4a45] text-[13px] font-bold hover:underline uppercase tracking-wide">
             EXPLORE ALL
-          </button>
+          </Link>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {['Action', 'Romance', 'Shonen', 'Cyberpunk', 'Seinen', 'Fantasy'].map(genre => (
@@ -203,9 +203,9 @@ export default function Search() {
             <p className="text-[#a38084] text-[14px] leading-relaxed mb-4 max-w-[200px]">
               Discover the most anticipated releases of Winter 2024.
             </p>
-            <button className="self-start text-[#101010] font-bold text-[14px] bg-[#ff4d4d] hover:bg-[#ff6b6b] px-5 py-2.5 rounded-lg transition-colors">
+            <Link to="/browse" className="self-start text-[#101010] font-bold text-[14px] bg-[#ff4d4d] hover:bg-[#ff6b6b] px-5 py-2.5 rounded-lg transition-colors">
               Explore Now
-            </button>
+            </Link>
           </div>
           
           <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none translate-x-[20%] translate-y-[20%] flex items-center justify-center">

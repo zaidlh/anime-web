@@ -32,6 +32,7 @@ export default function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="search" element={<Search />} />
+              <Route path="browse" element={<Browse />} />
               <Route path="browse/:source" element={<Browse />} />
               <Route path="title/:source/:id" element={<TitleDetail />} />
               <Route path="watch/:source/:id/:episode" element={<Watch />} />

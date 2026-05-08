@@ -88,7 +88,11 @@ export async function addToList(item: Omit<ListItem, 'addedAt'>) {
     const list = getMyListLocal();
     if (!list.some(i => i.id === item.id && i.source === item.source)) {
       list.unshift(fullItem);
-      localStorage.setItem(LIST_KEY, JSON.stringify(list));
+      try {
+        localStorage.setItem(LIST_KEY, JSON.stringify(list));
+      } catch (err) {
+        console.error("LocalStorage save error:", err);
+      }
     }
   }
 }
@@ -105,7 +109,11 @@ export async function removeFromList(id: string, source: string) {
   } else {
     const list = getMyListLocal();
     const newList = list.filter(item => !(item.id === id && item.source === source));
-    localStorage.setItem(LIST_KEY, JSON.stringify(newList));
+    try {
+      localStorage.setItem(LIST_KEY, JSON.stringify(newList));
+    } catch (err) {
+      console.error("LocalStorage save error:", err);
+    }
   }
 }
 
