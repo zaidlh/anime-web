@@ -99,7 +99,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               preload="metadata"
               poster={poster || undefined}
               src={selectedServer.directUrl as string}
-              referrerPolicy="no-referrer"
+              {...({ referrerPolicy: 'no-referrer' } as React.HTMLAttributes<HTMLVideoElement>)}
               className="w-full h-full object-cover outline-none"
               onError={(e) => {
                 console.error("Video error:", e.type);
