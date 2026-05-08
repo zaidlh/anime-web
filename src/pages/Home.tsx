@@ -112,8 +112,8 @@ export default function Home() {
                   className="shrink-0 w-[240px] md:w-[320px] group flex flex-col gap-3"
                 >
                   <div className="w-full aspect-video rounded-xl overflow-hidden bg-surface-container relative border border-transparent group-hover:border-outline transition-colors shadow-lg">
-                    {item.thumb ? (
-                       <img src={item.thumb} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    {item.episodes[0]?.thumb ? (
+                       <img src={item.episodes[0].thumb} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     ) : item.poster ? (
                        <img src={item.poster} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     ) : (

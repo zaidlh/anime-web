@@ -29,7 +29,10 @@ export default function Layout() {
       <header className="bg-background/80 docked full-width top-0 sticky backdrop-blur-xl border-b border-surface-variant z-50">
         <div className="flex justify-between items-center w-full px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
           <div className="flex items-center gap-md">
-            <button className="md:hidden flex items-center justify-center p-2 -ml-2 text-on-surface hover:bg-surface-variant rounded-full transition-colors">
+            <button 
+              className="md:hidden flex items-center justify-center p-2 -ml-2 text-on-surface hover:bg-surface-variant rounded-full transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
             <Link to="/" className="font-display-lg text-[22px] md:text-[24px] font-black tracking-tighter text-primary uppercase">
@@ -67,6 +70,88 @@ export default function Layout() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Drawer */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          {/* Drawer Panel */}
+          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-background border-r border-surface-variant shadow-xl transform transition-transform duration-300 ease-out">
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between p-4 border-b border-surface-variant">
+                <span className="font-display-lg text-[24px] font-black tracking-tighter text-primary uppercase">
+                  ANIMAX
+                </span>
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 hover:bg-surface-variant rounded-full transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[24px]">close</span>
+                </button>
+              </div>
+              <nav className="flex-1 overflow-y-auto py-4">
+                {navLinks.map((link) => {
+                  const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+                  return (
+                    <Link
+                      key={link.name}
+                      to={link.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-md px-6 py-4 transition-colors ${
+                        isActive ? 'bg-primary/10 text-primary' : 'text-on-surface hover:bg-surface-variant'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[24px]">
+                        {link.icon}
+                      </span>
+                      <span className="font-title-sm text-title-sm font-medium">
+                        {link.name}
+                      </span>
+                    </Link>
+                  );
+                })}
+                <div className="border-t border-surface-variant my-4" />
+                <Link
+                  to="/browse"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[24px]">apps</span>
+                  <span className="font-title-sm text-title-sm font-medium">Browse All</span>
+                </Link>
+                <Link
+                  to="/browse/animewitcher"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[24px]">tv</span>
+                  <span className="font-title-sm text-title-sm font-medium">Anime</span>
+                </Link>
+                <Link
+                  to="/browse/asia2tv"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[24px]">theater_comedy</span>
+                  <span className="font-title-sm text-title-sm font-medium">Drama</span>
+                </Link>
+                <Link
+                  to="/settings"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[24px]">settings</span>
+                  <span className="font-title-sm text-title-sm font-medium">Settings</span>
+                </Link>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1 w-full max-w-screen-2xl mx-auto">
         <Outlet />
