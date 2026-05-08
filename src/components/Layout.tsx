@@ -26,16 +26,16 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-surface font-body-md overflow-x-hidden selection:bg-primary/30 selection:text-white pb-20 md:pb-0">
       {/* TopNavBar - Fixed on all screens */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-surface-variant md:sticky">
-        <div className="flex justify-between items-center w-full px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
-          <div className="flex items-center gap-md">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-surface-variant">
+        <div className="flex justify-between items-center w-full px-4 md:px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
+          <div className="flex items-center gap-2 md:gap-md">
             <button 
               className="md:hidden flex items-center justify-center p-2 -ml-2 text-on-surface hover:bg-surface-variant rounded-full transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
-            <Link to="/" className="font-display-lg text-[22px] md:text-[24px] font-black tracking-tighter text-primary uppercase">
+            <Link to="/" className="font-display-lg text-[20px] md:text-[24px] font-black tracking-tighter text-primary uppercase">
               ANIMAX
             </Link>
             <nav className="hidden md:flex items-center gap-md ml-lg">
@@ -153,7 +153,7 @@ export default function Layout() {
         </div>
       )}
 
-      <main className="flex-1 w-full max-w-screen-2xl mx-auto pt-[64px]">
+      <main className="flex-1 w-full max-w-screen-2xl mx-auto pt-[56px] md:pt-[64px]">
         <Outlet />
       </main>
 

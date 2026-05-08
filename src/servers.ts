@@ -63,11 +63,38 @@ export function classifyServerUrl(url: string, name: string, quality: string | n
     };
   }
 
-  // Mediafire direct
-  if (lower.includes('mediafire.com') && /download/i.test(lower)) {
+  // Mediafire (needs a bit of a trick for direct download, but we'll mark as native for now)
+  if (lower.includes('mediafire.com')) {
     return {
       name, quality, capability: 'native',
       directUrl: url, embedUrl: null, originalUrl: url,
+    };
+  }
+
+  // Krakenfiles
+  if (lower.includes('krakenfiles.com')) {
+    const id = url.split('/').slice(-2, -1)[0];
+    return {
+      name, quality, capability: 'iframe',
+      directUrl: null, embedUrl: `https://krakenfiles.com/embed-video/${id}`, originalUrl: url,
+    };
+  }
+
+  // Streamtape
+  if (lower.includes('streamtape.com')) {
+    const id = url.split('/').slice(-2, -1)[0];
+    return {
+      name, quality, capability: 'iframe',
+      directUrl: null, embedUrl: `https://streamtape.com/e/${id}`, originalUrl: url,
+    };
+  }
+
+  // Vidtube
+  if (lower.includes('vidtube.one')) {
+    const id = url.split('/').pop();
+    return {
+      name, quality, capability: 'iframe',
+      directUrl: null, embedUrl: `https://vidtube.one/e/${id}`, originalUrl: url,
     };
   }
 

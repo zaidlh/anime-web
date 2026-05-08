@@ -69,7 +69,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
 
   return (
     <div className="flex flex-col gap-lg">
-      <section className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20">
+      <section className="w-full aspect-video bg-black md:rounded-xl overflow-hidden border-b md:border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20 -mx-4 md:mx-0">
         {!selectedServer ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center backdrop-blur-sm bg-black/60">
             <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-4">open_in_new</span>
@@ -117,6 +117,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               referrerPolicy="no-referrer"
               className="w-full h-full border-0"
               title={`${title} - ${episodeName}`}
+              sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
             />
             <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-label-caps font-bold pointer-events-none">
               Playing from {selectedServer.name}
@@ -125,15 +126,15 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
         )}
       </section>
 
-      <div className="flex flex-col lg:flex-row justify-between items-start gap-md mb-xl">
-        <div className="flex-1">
-          <h1 className="font-display-lg text-[22px] sm:text-[32px] text-on-surface mb-xs leading-tight font-black line-clamp-2 md:line-clamp-none">{episodeName}</h1>
-          <p className="font-title-sm text-on-surface-variant/80">
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-md mb-xl px-4 md:px-0">
+        <div className="flex-1 w-full">
+          <h1 className="font-display-lg text-[20px] sm:text-[32px] text-on-surface mb-xs leading-tight font-black line-clamp-2 md:line-clamp-none">{episodeName}</h1>
+          <p className="font-title-sm text-on-surface-variant/80 text-sm md:text-base">
             Part of <Link className="text-primary hover:text-primary-container font-bold transition-all underline decoration-primary/30 underline-offset-4" to={titleDetailUrl}>{title}</Link>
           </p>
 
-          <div className="flex items-center mt-md">
-            <div className="inline-flex rounded-xl border border-outline-variant/30 bg-surface-container-low overflow-hidden shadow-lg">
+          <div className="flex items-center mt-md overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="inline-flex rounded-xl border border-outline-variant/30 bg-surface-container-low overflow-hidden shadow-lg shrink-0">
               {prevEpUrl ? (
                 <Link to={prevEpUrl} className="flex items-center gap-xs px-md py-3 hover:bg-surface-variant transition-all font-title-sm text-on-surface border-r border-outline-variant/30 font-bold">
                   <span className="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -174,9 +175,9 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
         </div>
       </div>
 
-      <div className="mb-md">
-        <h3 className="font-label-caps text-label-caps text-primary/70 tracking-[0.2em] uppercase mb-sm font-bold">Select Streaming Server</h3>
-        <div className="flex flex-wrap gap-md">
+      <div className="mb-md px-4 md:px-0">
+        <h3 className="font-label-caps text-label-caps text-primary/70 tracking-[0.2em] uppercase mb-sm font-bold text-[10px] md:text-xs">Select Streaming Server</h3>
+        <div className="flex flex-wrap gap-3 md:gap-md">
           {allServers.map((s, i) => {
             const isSelected = selectedServer && selectedServer.name === s.name && selectedServer.quality === s.quality;
             return (

@@ -115,15 +115,23 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
     const urls = getSelectedUrls();
     for (let i = 0; i < urls.length; i++) {
         const item = urls[i];
-        const a = document.createElement('a');
-        a.href = item.url;
-        a.download = `${seriesTitle.replace(/[^a-z0-9]/gi, '_')}_EP${item.num}.mp4`;
-        a.rel = 'noreferrer';
-        a.referrerPolicy = 'no-referrer';
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        // If it's a direct URL (like pixeldrain api), we can try to download it
+        // Otherwise, we just open it in a new tab for the user to download manually
+        const isDirect = item.url.includes('pixeldrain.com/api/file/') || item.url.endsWith('.mp4') || item.url.endsWith('.mkv');
+        
+        if (isDirect) {
+          const a = document.createElement('a');
+          a.href = item.url;
+          a.download = `${seriesTitle.replace(/[^a-z0-9]/gi, '_')}_EP${item.num}.mp4`;
+          a.rel = 'noreferrer';
+          a.referrerPolicy = 'no-referrer';
+          a.target = '_blank';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } else {
+          window.open(item.url, '_blank', 'noopener,noreferrer');
+        }
         setDownloadedCount(i + 1);
         await new Promise(r => setTimeout(r, 1000));
     }
@@ -133,18 +141,18 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
 
   return (
     <>
-      <section className="relative mb-xl rounded-xl overflow-hidden ghost-border bg-surface-container">
+      <section className="relative mb-8 md:mb-xl md:rounded-xl overflow-hidden ghost-border bg-surface-container -mx-4 md:mx-0">
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-surface-container to-transparent z-0"></div>
-        <div className="relative z-10 p-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
+        <div className="relative z-10 p-6 md:p-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
           <div>
-            <h1 className="font-display-lg text-[48px] font-black text-on-surface mb-xs leading-none">{seriesTitle}</h1>
-            <p className="font-title-sm text-primary uppercase tracking-widest font-bold">Bulk Download</p>
+            <h1 className="font-display-lg text-[32px] md:text-[48px] font-black text-on-surface mb-xs leading-tight md:leading-none">{seriesTitle}</h1>
+            <p className="font-title-sm text-primary uppercase tracking-widest font-bold text-xs md:text-sm">Bulk Download</p>
           </div>
-          <div className="flex flex-col gap-xs min-w-[240px]">
-            <label className="font-label-caps text-outline uppercase font-bold text-[12px] tracking-wider">Preferred Quality</label>
+          <div className="flex flex-col gap-xs w-full md:min-w-[240px] md:w-auto">
+            <label className="font-label-caps text-outline uppercase font-bold text-[10px] md:text-[12px] tracking-wider">Preferred Quality</label>
             <div className="relative">
               <select 
-                className="w-full bg-surface-container-lowest ghost-border rounded-lg px-md py-sm font-body-md text-on-surface appearance-none focus:border-secondary-container outline-none transition-colors"
+                className="w-full bg-surface-container-lowest ghost-border rounded-lg px-md py-sm font-body-md text-on-surface appearance-none focus:border-secondary-container outline-none transition-colors text-sm md:text-base"
                 value={qualityPref}
                 onChange={(e) => setQualityPref(e.target.value as any)}
               >
@@ -159,7 +167,7 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
         </div>
       </section>
 
-      <div className="ghost-border rounded-xl bg-surface-container-lowest overflow-hidden mb-32">
+      <div className="ghost-border md:rounded-xl bg-surface-container-lowest overflow-hidden mb-32 -mx-4 md:mx-0">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap md:whitespace-normal">
             <thead>
@@ -233,12 +241,12 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
       </div>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-[64px] md:bottom-0 left-0 right-0 z-40 bg-surface-container/80 backdrop-blur-xl border-t border-outline-variant py-sm md:py-md px-margin-edge">
-        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-sm md:gap-md">
-          <div className="flex items-center gap-md">
+      <div className="fixed bottom-[56px] md:bottom-0 left-0 right-0 z-40 bg-surface-container/80 backdrop-blur-xl border-t border-outline-variant py-3 md:py-md px-4 md:px-margin-edge">
+        <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3 md:gap-md">
+          <div className="flex items-center justify-between w-full md:w-auto gap-md">
             <div className="flex flex-col">
-              <span className="font-label-caps text-[12px] font-bold text-outline uppercase tracking-wider">Selected</span>
-              <span className="font-headline-md text-[24px] font-bold text-on-surface">{selected.size} Episodes</span>
+              <span className="font-label-caps text-[10px] md:text-[12px] font-bold text-outline uppercase tracking-wider">Selected</span>
+              <span className="font-headline-md text-[18px] md:text-[24px] font-bold text-on-surface">{selected.size} Episodes</span>
             </div>
             {downloadState !== 'idle' && (
               <>
@@ -254,7 +262,7 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
               </>
             )}
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-sm">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 md:gap-sm w-full md:w-auto">
             <button 
               onClick={handleShareLinks}
               disabled={selected.size === 0}

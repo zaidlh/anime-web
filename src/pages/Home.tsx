@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <div className="w-full relative pb-12">
       {/* Hero Section */}
-      <section className="relative w-full h-[85vh] md:h-[90vh] flex flex-col justify-end overflow-hidden">
+      <section className="relative w-full h-[70vh] sm:h-[85vh] md:h-[90vh] flex flex-col justify-end overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img 
             src={continueWatchingItems[0]?.poster || "https://lh3.googleusercontent.com/aida-public/AB6AXuDm2YLCxtMp-83E8KVftRDE138d50-Jrf7UlILOwSpeNDL4Newi94OPQwAhIPOGhLV9Mj_DfuMMxcv5CNwnEdt8Ghx1AUUheXsL4_HtQIWadeR1M9UFeRaKoWRYQGQXyWidKsTNTpH73IKZ2aCAWEpltnaDQBIFAKCmYDLwSWBrBXM5k7f1NcZ_TqzLbgVwIzxeTjHRZUNpfp45tf6VYcUnHzDr9A8pUN535YwpnJrJCRQNcYX7oOZoQxfxG9WMu4iv3MeJ4EXFKkw"}
@@ -39,42 +39,42 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent md:w-3/4"></div>
         </div>
 
-        <div className="relative z-10 px-margin-edge w-full max-w-screen-2xl mx-auto pb-10">
+        <div className="relative z-10 px-4 md:px-margin-edge w-full max-w-screen-2xl mx-auto pb-6 md:pb-10">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-primary text-white px-2 py-0.5 rounded-sm font-label-caps text-[10px] uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(255,77,77,0.4)]">
+            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
+              <span className="bg-primary text-white px-2 py-0.5 rounded-sm font-label-caps text-[9px] md:text-[10px] uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(255,77,77,0.4)]">
                 Trending #1
               </span>
-              <span className="text-white/80 font-title-sm text-xs font-semibold tracking-wide">
+              <span className="text-white/80 font-title-sm text-[10px] md:text-xs font-semibold tracking-wide">
                 • Season 4 Available
               </span>
             </div>
             
-            <h1 className="font-display-lg text-[28px] sm:text-[40px] md:text-[64px] font-black mb-4 leading-[1.1] text-white drop-shadow-xl tracking-tighter line-clamp-3 md:line-clamp-none">
+            <h1 className="font-display-lg text-[24px] sm:text-[40px] md:text-[64px] font-black mb-2 md:mb-4 leading-[1.1] text-white drop-shadow-xl tracking-tighter line-clamp-2 md:line-clamp-none">
               {continueWatchingItems[0]?.english_title || continueWatchingItems[0]?.name || "Cyber:\nRebirth\nProject"}
             </h1>
             
-            <p className="font-body-md text-sm sm:text-base md:text-lg text-white/90 mb-8 max-w-[36rem] drop-shadow-md">
+            <p className="font-body-md text-xs sm:text-base md:text-lg text-white/90 mb-4 md:mb-8 max-w-[36rem] drop-shadow-md line-clamp-2 md:line-clamp-none">
               In a world where memories can be digitised, one rogue hacker discovers a truth that threatens the very fabric of Neo-Tokyo.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-row gap-3 md:gap-4">
               <Link 
                 to={`/title/animewitcher/${encodeURIComponent(continueWatchingItems[0]?.id || '')}`}
-                className="bg-primary text-black px-8 py-3 rounded-full font-title-sm text-sm flex items-center justify-center gap-2 hover:scale-105 transition-transform active:scale-95 shadow-[0_0_20px_rgba(255,77,77,0.3)] font-bold tracking-wide w-auto whitespace-nowrap"
+                className="bg-primary text-black px-4 md:px-8 py-2 md:py-3 rounded-full font-title-sm text-xs md:text-sm flex items-center justify-center gap-2 hover:scale-105 transition-transform active:scale-95 shadow-[0_0_20px_rgba(255,77,77,0.3)] font-bold tracking-wide w-auto whitespace-nowrap"
               >
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+                <span className="material-symbols-outlined text-[18px] md:text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 Watch Now
               </Link>
               <button 
-                className="bg-surface-container/60 backdrop-blur-md border border-white/10 text-white px-8 py-3 rounded-full font-title-sm text-sm flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors active:scale-95 font-bold tracking-wide w-auto whitespace-nowrap"
+                className="bg-surface-container/60 backdrop-blur-md border border-white/10 text-white px-4 md:px-8 py-2 md:py-3 rounded-full font-title-sm text-xs md:text-sm flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors active:scale-95 font-bold tracking-wide w-auto whitespace-nowrap"
               >
-                <span className="material-symbols-outlined text-[20px]">add</span>
+                <span className="material-symbols-outlined text-[18px] md:text-[20px]">add</span>
                 My List
               </button>
             </div>
 
-            <div className="flex items-center gap-4 mt-8 flex-wrap">
+            <div className="hidden sm:flex items-center gap-4 mt-8 flex-wrap">
               <span className="bg-primary/20 text-primary border border-primary/30 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase">
                 All Genres
               </span>
