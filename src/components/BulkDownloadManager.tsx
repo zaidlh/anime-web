@@ -25,8 +25,12 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
     qualitiesMap.set(ep.number, dlServers.map(s => s.quality).filter(Boolean) as string[]);
 
     if (dlServers.length > 0) {
-      let url = dlServers[0].directUrl;
-      const sorted = [...dlServers].sort((a,b) => {
+      // Prioritize Pixeldrain (PX) servers
+      const pxServers = dlServers.filter(s => s.name.toLowerCase().includes('pixeldrain') || s.name.toLowerCase() === 'px');
+      const targetServers = pxServers.length > 0 ? pxServers : dlServers;
+
+      let url = targetServers[0].directUrl;
+      const sorted = [...targetServers].sort((a,b) => {
          const qA = a.quality ? parseInt(a.quality) : 0;
          const qB = b.quality ? parseInt(b.quality) : 0;
          return qB - qA;
