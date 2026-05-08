@@ -198,9 +198,9 @@ export default function Search() {
       {/* New Season Hits */}
       <section className="mb-0">
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#2a1215] to-[#120a0b] border border-[#3e1b1e] p-6 flex flex-row items-center min-h-[160px]">
-          <div className="flex flex-col z-10 w-[60%]">
-            <h2 className="text-[22px] font-bold text-white tracking-wide mb-2">New Season Hits</h2>
-            <p className="text-[#a38084] text-[14px] leading-relaxed mb-4 max-w-[200px]">
+          <div className="flex flex-col z-10 w-full md:w-[60%]">
+            <h2 className="text-[20px] sm:text-[22px] font-bold text-white tracking-wide mb-2">New Season Hits</h2>
+            <p className="text-[#a38084] text-[13px] sm:text-[14px] leading-relaxed mb-4 max-w-[250px]">
               Discover the most anticipated releases of Winter 2024.
             </p>
             <Link to="/browse" className="self-start text-[#101010] font-bold text-[14px] bg-[#ff4d4d] hover:bg-[#ff6b6b] px-5 py-2.5 rounded-lg transition-colors">

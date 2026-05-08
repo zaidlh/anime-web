@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useEpisodeByNumber, SourceType } from '../lib/data';
-import { decodeBase64Url } from '../lib/utils';
+import { decodeBase64Url, safeDecodeURIComponent } from '../lib/utils';
 import { VideoPlayer } from '../components/VideoPlayer';
 import { classifyServerUrl } from '../servers';
 
 export default function Watch() {
   const { source, id, episode } = useParams<{ source: string; id: string; episode: string }>();
   
-  const decodedId = source === 'animewitcher' ? decodeURIComponent(id || '') : decodeBase64Url(id || '');
+  const decodedId = source === 'animewitcher' ? safeDecodeURIComponent(id || '') : decodeBase64Url(id || '');
   
   const data = useEpisodeByNumber(source as SourceType, decodedId, episode || '');
 

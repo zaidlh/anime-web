@@ -3,6 +3,16 @@
 
 @import "tailwindcss";
 
+:root {
+  --margin-edge-val: 1rem;
+}
+@media (min-width: 768px) {
+  :root { --margin-edge-val: 1.5rem; }
+}
+@media (min-width: 1024px) {
+  :root { --margin-edge-val: 2rem; }
+}
+
 @theme {
   --color-surface: #0a0a0a;
   --color-background: #0a0a0a;
@@ -53,7 +63,7 @@
   --color-inverse-on-surface: #1a1a1a;
 
   --spacing-lg: 2.5rem;
-  --spacing-margin-edge: 1.5rem;
+  --spacing-margin-edge: var(--margin-edge-val);
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-base: 4px;

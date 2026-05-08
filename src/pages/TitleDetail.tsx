@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTitleById, SourceType } from '../lib/data';
-import { decodeBase64Url } from '../lib/utils';
+import { decodeBase64Url, safeDecodeURIComponent } from '../lib/utils';
 import { EpisodeList } from '../components/EpisodeList';
 import { useIsInList, addToList, removeFromList } from '../lib/list';
 
 export default function TitleDetail() {
   const { source, id } = useParams<{ source: string; id: string }>();
   
-  const decodedId = source === 'animewitcher' ? decodeURIComponent(id || '') : decodeBase64Url(id || '');
+  const decodedId = source === 'animewitcher' ? safeDecodeURIComponent(id || '') : decodeBase64Url(id || '');
   const { title, loading } = useTitleById(source as SourceType, decodedId);
 
   const isAnime = source === 'animewitcher';
@@ -95,7 +95,7 @@ export default function TitleDetail() {
             <span className="text-on-surface-variant/60 text-sm font-medium">{t.year || '2024'}</span>
           </div>
 
-          <h1 className="font-display-lg text-[40px] md:text-[64px] font-black text-on-surface tracking-tighter leading-[1.1] drop-shadow-lg">
+          <h1 className="font-display-lg text-[28px] sm:text-[36px] md:text-[56px] font-black text-on-surface tracking-tighter leading-[1.1] drop-shadow-lg">
             {displayTitle}
           </h1>
           

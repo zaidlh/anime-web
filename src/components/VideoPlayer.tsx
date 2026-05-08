@@ -127,7 +127,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
 
       <div className="flex flex-col lg:flex-row justify-between items-start gap-md mb-xl">
         <div className="flex-1">
-          <h1 className="font-display-lg text-[36px] text-on-surface mb-xs leading-tight font-black">{episodeName}</h1>
+          <h1 className="font-display-lg text-[22px] sm:text-[32px] text-on-surface mb-xs leading-tight font-black line-clamp-2 md:line-clamp-none">{episodeName}</h1>
           <p className="font-title-sm text-on-surface-variant/80">
             Part of <Link className="text-primary hover:text-primary-container font-bold transition-all underline decoration-primary/30 underline-offset-4" to={titleDetailUrl}>{title}</Link>
           </p>

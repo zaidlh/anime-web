@@ -50,11 +50,11 @@ export default function Home() {
               </span>
             </div>
             
-            <h1 className="font-display-lg text-[48px] md:text-[72px] font-black mb-4 leading-[1.1] text-white drop-shadow-xl tracking-tighter">
+            <h1 className="font-display-lg text-[28px] sm:text-[40px] md:text-[64px] font-black mb-4 leading-[1.1] text-white drop-shadow-xl tracking-tighter line-clamp-3 md:line-clamp-none">
               {continueWatchingItems[0]?.english_title || continueWatchingItems[0]?.name || "Cyber:\nRebirth\nProject"}
             </h1>
             
-            <p className="font-body-md text-base md:text-lg text-white/90 mb-8 max-w-[36rem] drop-shadow-md">
+            <p className="font-body-md text-sm sm:text-base md:text-lg text-white/90 mb-8 max-w-[36rem] drop-shadow-md">
               In a world where memories can be digitised, one rogue hacker discovers a truth that threatens the very fabric of Neo-Tokyo.
             </p>
             
@@ -101,40 +101,45 @@ export default function Home() {
           </div>
           
           <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 -mx-margin-edge px-margin-edge md:mx-0 md:px-0">
-            {continueWatchingItems.map((item, idx) => (
-              <Link 
-                key={idx} 
-                to={`/title/animewitcher/${encodeURIComponent(item.id)}`} 
-                className="shrink-0 w-[240px] md:w-[320px] group flex flex-col gap-3"
-              >
-                <div className="w-full aspect-video rounded-xl overflow-hidden bg-surface-container relative border border-transparent group-hover:border-outline transition-colors shadow-lg">
-                  {item.thumb ? (
-                     <img src={item.thumb} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  ) : item.poster ? (
-                     <img src={item.poster} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  ) : (
-                     <div className="w-full h-full flex flex-col items-center justify-center bg-surface-container-high">
-                       <span className="material-symbols-outlined text-[32px] text-outline-variant">movie</span>
-                     </div>
-                  )}
-                  {/* Progress Bar */}
-                  <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/20">
-                    <div className="h-full bg-primary" style={{ width: `${Math.random() * 60 + 20}%` }}></div>
+            {continueWatchingItems.map((item, idx) => {
+              const randomWidth = Math.random() * 60 + 20;
+              const randomTime = Math.floor(Math.random() * 15 + 5);
+
+              return (
+                <Link 
+                  key={idx} 
+                  to={`/title/animewitcher/${encodeURIComponent(item.id)}`} 
+                  className="shrink-0 w-[240px] md:w-[320px] group flex flex-col gap-3"
+                >
+                  <div className="w-full aspect-video rounded-xl overflow-hidden bg-surface-container relative border border-transparent group-hover:border-outline transition-colors shadow-lg">
+                    {item.thumb ? (
+                       <img src={item.thumb} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    ) : item.poster ? (
+                       <img src={item.poster} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    ) : (
+                       <div className="w-full h-full flex flex-col items-center justify-center bg-surface-container-high">
+                         <span className="material-symbols-outlined text-[32px] text-outline-variant">movie</span>
+                       </div>
+                    )}
+                    {/* Progress Bar */}
+                    <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/20">
+                      <div className="h-full bg-primary" style={{ width: `${randomWidth}%` }}></div>
+                    </div>
+                    {/* Play Overlay */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                      <span className="material-symbols-outlined text-white text-[48px] drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+                    </div>
                   </div>
-                  {/* Play Overlay */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                    <span className="material-symbols-outlined text-white text-[48px] drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+                  <div>
+                    <h3 className="font-title-sm text-[16px] font-bold text-white line-clamp-1">{item.english_title || item.name}</h3>
+                    <p className="font-body-md text-xs text-on-surface-variant flex items-center justify-between mt-1">
+                      <span>S1 : E{idx + 1}</span>
+                      <span>{randomTime}:45 left</span>
+                    </p>
                   </div>
-                </div>
-                <div>
-                  <h3 className="font-title-sm text-[16px] font-bold text-white line-clamp-1">{item.english_title || item.name}</h3>
-                  <p className="font-body-md text-xs text-on-surface-variant flex items-center justify-between mt-1">
-                    <span>S1 : E{idx + 1}</span>
-                    <span>{Math.floor(Math.random() * 15 + 5)}:45 left</span>
-                  </p>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </section>
 

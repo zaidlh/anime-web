@@ -160,9 +160,10 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
       </section>
 
       <div className="ghost-border rounded-xl bg-surface-container-lowest overflow-hidden mb-32">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-surface-container-high border-b border-outline-variant">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap md:whitespace-normal">
+            <thead>
+              <tr className="bg-surface-container-high border-b border-outline-variant">
               <th className="p-md w-12 text-center">
                 <input 
                   type="checkbox"
@@ -227,12 +228,13 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container/80 backdrop-blur-xl border-t border-outline-variant py-md px-margin-edge">
-        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-md">
+      <div className="fixed bottom-[64px] md:bottom-0 left-0 right-0 z-40 bg-surface-container/80 backdrop-blur-xl border-t border-outline-variant py-sm md:py-md px-margin-edge">
+        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-sm md:gap-md">
           <div className="flex items-center gap-md">
             <div className="flex flex-col">
               <span className="font-label-caps text-[12px] font-bold text-outline uppercase tracking-wider">Selected</span>
