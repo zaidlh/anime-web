@@ -8,6 +8,7 @@ export default function Search() {
   const [params, setParams] = useSearchParams();
   const q = params.get('q') || '';
   const [inputValue, setInputValue] = useState(q);
+  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
   const results = useSearchTitles(q);
@@ -50,7 +51,11 @@ export default function Search() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
             />
-            <button type="button" className="ml-2 flex items-center text-[#8E8E8E] hover:text-white transition-colors">
+            <button 
+              type="button" 
+              onClick={() => setShowFilters(!showFilters)}
+              className="ml-2 flex items-center text-[#8E8E8E] hover:text-white transition-colors"
+            >
               <span className="material-symbols-outlined">tune</span>
             </button>
           </form>
@@ -137,7 +142,13 @@ export default function Search() {
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {['Action', 'Romance', 'Shonen', 'Cyberpunk', 'Seinen', 'Fantasy'].map(genre => (
-            <button key={genre} className="bg-[#2a2a2e] hover:bg-[#3a3a3e] border border-[#3a3a3e] text-[#d4d4d4] px-5 py-2.5 rounded-full text-[14px] font-medium transition-colors cursor-pointer">
+            <button 
+              key={genre} 
+              onClick={() => {
+                setParams({ q: genre });
+              }}
+              className="bg-[#2a2a2e] hover:bg-[#3a3a3e] border border-[#3a3a3e] text-[#d4d4d4] px-5 py-2.5 rounded-full text-[14px] font-medium transition-colors cursor-pointer"
+            >
               {genre}
             </button>
           ))}

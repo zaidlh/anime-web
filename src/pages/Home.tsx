@@ -147,9 +147,9 @@ export default function Home() {
         <section className="mb-12">
           <div className="flex justify-between items-end mb-6">
             <h2 className="font-display-lg text-[22px] md:text-[28px] font-bold text-white tracking-tight">Top Rated Series</h2>
-            <button className="text-on-surface-variant hover:text-white transition-colors">
+            <Link to="/browse" className="text-on-surface-variant hover:text-white transition-colors">
               <span className="material-symbols-outlined">grid_view</span>
-            </button>
+            </Link>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
