@@ -6,6 +6,7 @@ import { PosterCard } from '../components/PosterCard';
 export default function Browse() {
   const { source } = useParams<{ source: string }>();
   const { animewitcher, asia2tv, loading } = useAllTitles();
+  const [activeTab, setActiveTab] = React.useState<'all' | 'anime' | 'drama'>(source === 'asia2tv' ? 'drama' : source === 'animewitcher' ? 'anime' : 'all');
   
   if (loading) {
     return (
@@ -19,17 +20,29 @@ export default function Browse() {
     return <div className="text-center py-20 font-headline-md font-bold text-on-surface">Source not found.</div>;
   }
 
+  const animeItems = animewitcher.map(t => ({ ...t, _source: 'animewitcher' }));
+  const dramaItems = asia2tv.map(t => ({ ...t, _source: 'asia2tv' }));
+  
   const items = !source 
-    ? [...animewitcher.map(t => ({ ...t, _source: 'animewitcher' })), ...asia2tv.map(t => ({ ...t, _source: 'asia2tv' }))]
+    ? activeTab === 'all' 
+      ? [...animeItems, ...dramaItems]
+      : activeTab === 'anime'
+        ? animeItems
+        : dramaItems
     : source === 'animewitcher' 
-      ? animewitcher.map(t => ({ ...t, _source: 'animewitcher' })) 
-      : asia2tv.map(t => ({ ...t, _source: 'asia2tv' }));
+      ? animeItems 
+      : dramaItems;
 
   const sourceName = !source 
     ? 'All Catalog' 
     : source === 'animewitcher' 
       ? 'Anime (AnimeWitcher)' 
       : 'Asian Drama (Asia2TV)';
+
+  // Count items per category
+  const animeCount = animeItems.length;
+  const dramaCount = dramaItems.length;
+  const totalCount = animeCount + dramaCount;
 
   return (
     <div className="max-w-[1200px] mx-auto px-margin-edge py-lg">
@@ -40,6 +53,42 @@ export default function Browse() {
           {items.length} titles available
         </p>
       </div>
+
+      {/* Tabs for Browse All page */}
+      {!source && (
+        <div className="flex justify-center gap-2 mb-xl">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`px-6 py-3 rounded-full font-title-sm font-bold transition-colors ${
+              activeTab === 'all' 
+                ? 'bg-primary text-on-primary' 
+                : 'bg-surface-container text-on-surface-variant hover:bg-surface-variant'
+            }`}
+          >
+            All ({totalCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('anime')}
+            className={`px-6 py-3 rounded-full font-title-sm font-bold transition-colors ${
+              activeTab === 'anime' 
+                ? 'bg-primary text-on-primary' 
+                : 'bg-surface-container text-on-surface-variant hover:bg-surface-variant'
+            }`}
+          >
+            Anime ({animeCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('drama')}
+            className={`px-6 py-3 rounded-full font-title-sm font-bold transition-colors ${
+              activeTab === 'drama' 
+                ? 'bg-primary text-on-primary' 
+                : 'bg-surface-container text-on-surface-variant hover:bg-surface-variant'
+            }`}
+          >
+            Drama ({dramaCount})
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-gutter mb-xl">
         {items.map((t: any) => (
