@@ -25,8 +25,8 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-surface font-body-md overflow-x-hidden selection:bg-primary/30 selection:text-white pb-20 md:pb-0">
-      {/* TopNavBar */}
-      <header className="bg-background/80 docked full-width top-0 sticky backdrop-blur-xl border-b border-surface-variant z-50">
+      {/* TopNavBar - Fixed on all screens */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-surface-variant md:sticky">
         <div className="flex justify-between items-center w-full px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
           <div className="flex items-center gap-md">
             <button 
@@ -153,7 +153,7 @@ export default function Layout() {
         </div>
       )}
 
-      <main className="flex-1 w-full max-w-screen-2xl mx-auto">
+      <main className="flex-1 w-full max-w-screen-2xl mx-auto pt-[64px]">
         <Outlet />
       </main>
 
