@@ -11,6 +11,7 @@ interface BulkDownloadManagerProps {
 export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownloadManagerProps) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [qualityPref, setQualityPref] = useState<'best'|'1080p'|'720p'|'480p'>('1080p');
+  const [serverPref, setServerPref] = useState<'auto' | 'pixeldrain' | 'mediafire'>('auto');
   const [downloadState, setDownloadState] = useState<'idle' | 'downloading' | 'done'>('idle');
   const [downloadedCount, setDownloadedCount] = useState(0);
   
@@ -25,9 +26,19 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
     qualitiesMap.set(ep.number, dlServers.map(s => s.quality).filter(Boolean) as string[]);
 
     if (dlServers.length > 0) {
-      // Prioritize Pixeldrain (PX) servers
-      const pxServers = dlServers.filter(s => s.name.toLowerCase().includes('pixeldrain') || s.name.toLowerCase() === 'px');
-      const targetServers = pxServers.length > 0 ? pxServers : dlServers;
+      let targetServers = dlServers;
+      
+      if (serverPref === 'pixeldrain') {
+        const px = dlServers.filter(s => s.name.toLowerCase().includes('pixeldrain') || s.name.toLowerCase() === 'px');
+        if (px.length > 0) targetServers = px;
+      } else if (serverPref === 'mediafire') {
+        const mf = dlServers.filter(s => s.name.toLowerCase().includes('mediafire'));
+        if (mf.length > 0) targetServers = mf;
+      } else {
+        // Auto: Prioritize Pixeldrain
+        const px = dlServers.filter(s => s.name.toLowerCase().includes('pixeldrain') || s.name.toLowerCase() === 'px');
+        if (px.length > 0) targetServers = px;
+      }
 
       let url = targetServers[0].directUrl;
       const sorted = [...targetServers].sort((a,b) => {
@@ -152,20 +163,37 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
             <h1 className="font-display-lg text-[32px] md:text-[48px] font-black text-on-surface mb-xs leading-tight md:leading-none">{seriesTitle}</h1>
             <p className="font-title-sm text-primary uppercase tracking-widest font-bold text-xs md:text-sm">Bulk Download</p>
           </div>
-          <div className="flex flex-col gap-xs w-full md:min-w-[240px] md:w-auto">
-            <label className="font-label-caps text-outline uppercase font-bold text-[10px] md:text-[12px] tracking-wider">Preferred Quality</label>
-            <div className="relative">
-              <select 
-                className="w-full bg-surface-container-lowest ghost-border rounded-lg px-md py-sm font-body-md text-on-surface appearance-none focus:border-secondary-container outline-none transition-colors text-sm md:text-base"
-                value={qualityPref}
-                onChange={(e) => setQualityPref(e.target.value as any)}
-              >
-                <option value="best">Best Available</option>
-                <option value="1080p">Full HD (1080p)</option>
-                <option value="720p">HD (720p)</option>
-                <option value="480p">SD (480p)</option>
-              </select>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+          <div className="flex flex-col sm:flex-row gap-md w-full md:w-auto">
+            <div className="flex flex-col gap-xs min-w-[180px]">
+              <label className="font-label-caps text-outline uppercase font-bold text-[10px] md:text-[12px] tracking-wider">Preferred Server</label>
+              <div className="relative">
+                <select 
+                  className="w-full bg-surface-container-lowest ghost-border rounded-lg px-md py-sm font-body-md text-on-surface appearance-none focus:border-secondary-container outline-none transition-colors text-sm md:text-base"
+                  value={serverPref}
+                  onChange={(e) => setServerPref(e.target.value as any)}
+                >
+                  <option value="auto">Auto (Best)</option>
+                  <option value="pixeldrain">Pixeldrain (PX)</option>
+                  <option value="mediafire">Mediafire</option>
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-xs min-w-[180px]">
+              <label className="font-label-caps text-outline uppercase font-bold text-[10px] md:text-[12px] tracking-wider">Preferred Quality</label>
+              <div className="relative">
+                <select 
+                  className="w-full bg-surface-container-lowest ghost-border rounded-lg px-md py-sm font-body-md text-on-surface appearance-none focus:border-secondary-container outline-none transition-colors text-sm md:text-base"
+                  value={qualityPref}
+                  onChange={(e) => setQualityPref(e.target.value as any)}
+                >
+                  <option value="best">Best Available</option>
+                  <option value="1080p">Full HD (1080p)</option>
+                  <option value="720p">HD (720p)</option>
+                  <option value="480p">SD (480p)</option>
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+              </div>
             </div>
           </div>
         </div>
@@ -258,9 +286,9 @@ export function BulkDownloadManager({ source, seriesTitle, episodes }: BulkDownl
                  <div className="flex flex-col">
                     <span className="font-label-caps text-[12px] font-bold text-outline uppercase tracking-wider">Status</span>
                     {downloadState === 'downloading' ? (
-                       <span className="font-headline-md text-[24px] font-bold text-secondary animate-pulse">Downloading {downloadedCount}/{selected.size}...</span>
+                       <span className="font-headline-md text-[18px] md:text-[24px] font-bold text-secondary animate-pulse">Downloading {downloadedCount}/{selected.size}...</span>
                     ) : (
-                       <span className="font-headline-md text-[24px] font-bold text-tertiary">Downloads Completed</span>
+                       <span className="font-headline-md text-[18px] md:text-[24px] font-bold text-tertiary">Downloads Completed</span>
                     )}
                  </div>
               </>
