@@ -1,41 +1,27 @@
 {
   "entities": {
-    "User": {
-      "title": "User",
-      "description": "User profile data",
-      "type": "object",
-      "properties": {
-        "email": { "type": "string" },
-        "displayName": { "type": "string" },
-        "photoURL": { "type": "string" },
-        "createdAt": { "type": "string", "format": "timestamp" },
-        "updatedAt": { "type": "string", "format": "timestamp" }
-      },
-      "required": ["email", "createdAt", "updatedAt"]
-    },
-    "ListItem": {
-      "title": "ListItem",
-      "description": "An item saved in a user's local list",
+    "AnimeTitle": {
+      "title": "AnimeTitle",
+      "description": "An anime or drama title",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "source": { "type": "string" },
-        "title": { "type": "string" },
-        "poster": { "type": "string" },
-        "type": { "type": "string" },
-        "addedAt": { "type": "number", "format": "timestamp" }
+        "name": { "type": "string" },
+        "english_title": { "type": ["string", "null"] },
+        "type": { "type": ["string", "null"] },
+        "poster": { "type": ["string", "null"] },
+        "story": { "type": ["string", "null"] },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "source": { "type": "string", "enum": ["animewitcher", "asia2tv"] },
+        "episodesBlob": { "type": "string", "description": "JSON stringified episodes array to stay within limits" }
       },
-      "required": ["id", "source", "title", "addedAt"]
+      "required": ["id", "name", "source"]
     }
   },
   "firestore": {
-    "users/{userId}": {
-      "schema": { "$ref": "#/entities/User" },
-      "description": "User profile document"
-    },
-    "users/{userId}/myList/{listItemId}": {
-      "schema": { "$ref": "#/entities/ListItem" },
-      "description": "Items in the user's list"
+    "titles": {
+      "schema": { "$ref": "#/entities/AnimeTitle" },
+      "description": "All anime and drama titles"
     }
   }
 }
