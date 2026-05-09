@@ -1,21 +1,51 @@
-import React, { useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useMemo, useEffect, useRef } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEpisodeByNumber, SourceType } from '../lib/data';
 import { decodeBase64Url, safeDecodeURIComponent } from '../lib/utils';
 import { VideoPlayer } from '../components/VideoPlayer';
 import { classifyServerUrl } from '../servers';
+import { useHistory, saveHistoryItem } from '../lib/history';
+import { ToastProvider } from '../components/Toast';
+
+import { SkeletonHero } from '../components/Skeleton';
 
 export default function Watch() {
   const { source, id, episode } = useParams<{ source: string; id: string; episode: string }>();
+  const navigate = useNavigate();
+  const { markCompleted, history } = useHistory();
   
   const decodedId = source === 'animewitcher' ? safeDecodeURIComponent(id || '') : decodeBase64Url(id || '');
   
   const data = useEpisodeByNumber(source as SourceType, decodedId, episode || '');
 
+  const initialTime = useMemo(() => {
+    if (!data || !data.title || !data.episode) return 0;
+    const epId = source === 'animewitcher' ? (data.episode.doc_id || data.episode.number) : data.episode.number;
+    const key = `${source}_${decodedId}_${epId}`;
+    return history[key]?.time || 0;
+  }, [data, source, decodedId, history]);
+
+  useEffect(() => {
+    if (data && data.title && data.episode) {
+      const epId = source === 'animewitcher' ? (data.episode.doc_id || data.episode.number) : data.episode.number;
+      const key = `${source}_${decodedId}_${epId}`;
+      const existing = history[key];
+      
+      saveHistoryItem({
+        source: source as string,
+        titleId: decodedId,
+        epId: epId,
+        time: existing?.time || 0,
+        duration: existing?.duration || 0,
+        completed: false
+      });
+    }
+  }, [data, source, decodedId]);
+
   if (data?.loading) {
     return (
-      <div className="w-full h-[70vh] flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="max-w-[1200px] mx-auto px-margin-edge py-lg">
+        <SkeletonHero />
       </div>
     );
   }
@@ -53,6 +83,32 @@ export default function Watch() {
   const titleDetailUrl = `/title/${source}/${encodeURIComponent(id || '')}`;
   const downloadUrl = `/download/${source}/${encodeURIComponent(id || '')}`;
 
+  const handleEnded = () => {
+    const epId = source === 'animewitcher' ? (ep.doc_id || ep.number) : ep.number;
+    markCompleted(source as string, decodedId, epId);
+    if (nextEp) {
+      navigate(getEpUrl(nextEp));
+    }
+  };
+
+  const timeUpdateRef = useRef<{time: number, nextSaveTime: number}>({ time: 0, nextSaveTime: 0 });
+
+  const handleTimeUpdate = (time: number, duration: number) => {
+    // Save every 5 seconds to avoid localStorage spam
+    if (time > timeUpdateRef.current.nextSaveTime || time < timeUpdateRef.current.nextSaveTime - 10) {
+      timeUpdateRef.current.nextSaveTime = time + 5;
+      const epId = source === 'animewitcher' ? (ep.doc_id || ep.number) : ep.number;
+      saveHistoryItem({
+        source: source as string,
+        titleId: decodedId,
+        epId: epId,
+        time: time,
+        duration: duration,
+        completed: false
+      });
+    }
+  };
+
   return (
     <div className="max-w-[1200px] mx-auto px-margin-edge py-lg">
       <VideoPlayer 
@@ -64,6 +120,9 @@ export default function Watch() {
         downloadUrl={downloadUrl}
         prevEpUrl={prevEp ? getEpUrl(prevEp) : null}
         nextEpUrl={nextEp ? getEpUrl(nextEp) : null}
+        onEnded={handleEnded}
+        onTimeUpdate={handleTimeUpdate}
+        initialTime={initialTime}
       />
     </div>
   );

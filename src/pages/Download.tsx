@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTitleById, SourceType } from '../lib/data';
 import { decodeBase64Url, safeDecodeURIComponent } from '../lib/utils';
 import { BulkDownloadManager } from '../components/BulkDownloadManager';
+import { SkeletonEpisodeGrid } from '../components/Skeleton';
 
 export default function Download() {
   const { source, id } = useParams<{ source: string; id: string }>();
@@ -12,8 +13,8 @@ export default function Download() {
 
   if (loading) {
     return (
-      <div className="w-full h-[70vh] flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="max-w-[1200px] mx-auto px-margin-edge py-lg">
+        <SkeletonEpisodeGrid />
       </div>
     );
   }

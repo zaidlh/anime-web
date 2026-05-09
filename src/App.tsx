@@ -22,12 +22,14 @@ import NotFound from './pages/NotFound';
 
 import { AuthProvider } from './lib/useAuth';
 import { DataProvider } from './lib/data';
+import { ToastProvider } from './components/Toast';
 
 export default function App() {
   return (
     <AuthProvider>
-      <DataProvider>
-        <BrowserRouter>
+      <ToastProvider>
+        <DataProvider>
+          <BrowserRouter>
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
@@ -47,8 +49,9 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
-        </BrowserRouter>
-      </DataProvider>
+          </BrowserRouter>
+        </DataProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

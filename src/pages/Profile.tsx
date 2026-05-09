@@ -1,10 +1,12 @@
 import React from 'react';
 import { useAuth } from '../lib/useAuth';
 import { useMyList } from '../lib/list';
+import { useToast } from '../components/Toast';
 
 export default function Profile() {
   const { user, loading, signInWithGoogle, logout } = useAuth();
   const { list, loading: listLoading } = useMyList();
+  const { showToast } = useToast();
 
   if (loading) {
     return (
@@ -18,6 +20,24 @@ export default function Profile() {
   const joinedDate = user?.metadata?.creationTime
     ? `JOINED ${new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()}`
     : 'JOINED RECENTLY';
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      showToast('Signed out successfully');
+    } catch (e) {
+      showToast('Error signing out', 'error');
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      await signInWithGoogle();
+      showToast('Signed in successfully', 'success');
+    } catch (e) {
+      showToast('Error signing in', 'error');
+    }
+  };
 
   return (
     <div className="w-full max-w-[600px] mx-auto px-margin-edge flex flex-col items-center relative pb-20">
@@ -148,7 +168,7 @@ export default function Profile() {
 
           {/* Logout */}
           <button 
-            onClick={logout}
+            onClick={handleLogout}
             className="text-on-surface-variant text-[12px] font-bold uppercase tracking-widest mb-8 hover:text-primary transition-colors py-4 px-8"
           >
             Logout Account
@@ -165,7 +185,7 @@ export default function Profile() {
             Sign in to track your watch history, save your favorite series, and unlock exclusive VIP features across all devices.
           </p>
           <button 
-            onClick={signInWithGoogle}
+            onClick={handleLogin}
             className="bg-white hover:bg-gray-200 text-black px-8 py-4 rounded-full font-bold text-sm transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center gap-3 active:scale-95 w-full justify-center"
           >
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google logo" />

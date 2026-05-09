@@ -1,8 +1,14 @@
 export function encodeBase64Url(str: string) {
-  // Encode any Unicode string to base64url format
-  // btoa only handles Latin1, so we encode as UTF-8 first via encodeURIComponent
-  const binary = encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  try {
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  } catch (err) {
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
 }
 
 export function decodeBase64Url(str: string) {
@@ -11,9 +17,12 @@ export function decodeBase64Url(str: string) {
     while (base64.length % 4) {
       base64 += '=';
     }
-    // Decode base64, then convert UTF-8 bytes back to string
     const binary = atob(base64);
-    return decodeURIComponent(binary.split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join(''));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
   } catch (err) {
     return str;
   }

@@ -1,13 +1,33 @@
-import React from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../lib/useAuth';
 
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) setSearchQuery(q);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) setShowBackToTop(true);
+      else setShowBackToTop(false);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setShowBackToTop(false);
+  }, [location.pathname]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,17 +45,18 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-surface font-body-md overflow-x-hidden selection:bg-primary/30 selection:text-white pb-20 md:pb-0">
-      {/* TopNavBar - Fixed on all screens */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-surface-variant">
-        <div className="flex justify-between items-center w-full px-4 md:px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
-          <div className="flex items-center gap-2 md:gap-md">
+      {/* TopNavBar */}
+      <header className="bg-background/80 docked full-width top-0 sticky backdrop-blur-xl border-b border-surface-variant z-50">
+        <div className="flex justify-between items-center w-full px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
+          <div className="flex items-center gap-md">
             <button 
+              onClick={() => setIsMobileMenuOpen(true)}
               className="md:hidden flex items-center justify-center p-2 -ml-2 text-on-surface hover:bg-surface-variant rounded-full transition-colors"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Open menu"
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
-            <Link to="/" className="font-display-lg text-[20px] md:text-[24px] font-black tracking-tighter text-primary uppercase">
+            <Link to="/" className="font-display-lg text-[22px] md:text-[24px] font-black tracking-tighter text-primary uppercase" aria-label="Animax Home">
               ANIMAX
             </Link>
             <nav className="hidden md:flex items-center gap-md ml-lg">
@@ -71,89 +92,7 @@ export default function Layout() {
         </div>
       </header>
 
-      {/* Mobile Drawer */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          {/* Drawer Panel */}
-          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-background border-r border-surface-variant shadow-xl transform transition-transform duration-300 ease-out">
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between p-4 border-b border-surface-variant">
-                <span className="font-display-lg text-[24px] font-black tracking-tighter text-primary uppercase">
-                  ANIMAX
-                </span>
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 hover:bg-surface-variant rounded-full transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[24px]">close</span>
-                </button>
-              </div>
-              <nav className="flex-1 overflow-y-auto py-4">
-                {navLinks.map((link) => {
-                  const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
-                  return (
-                    <Link
-                      key={link.name}
-                      to={link.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-md px-6 py-4 transition-colors ${
-                        isActive ? 'bg-primary/10 text-primary' : 'text-on-surface hover:bg-surface-variant'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[24px]">
-                        {link.icon}
-                      </span>
-                      <span className="font-title-sm text-title-sm font-medium">
-                        {link.name}
-                      </span>
-                    </Link>
-                  );
-                })}
-                <div className="border-t border-surface-variant my-4" />
-                <Link
-                  to="/browse"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[24px]">apps</span>
-                  <span className="font-title-sm text-title-sm font-medium">Browse All</span>
-                </Link>
-                <Link
-                  to="/browse/animewitcher"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[24px]">tv</span>
-                  <span className="font-title-sm text-title-sm font-medium">Anime</span>
-                </Link>
-                <Link
-                  to="/browse/asia2tv"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[24px]">theater_comedy</span>
-                  <span className="font-title-sm text-title-sm font-medium">Drama</span>
-                </Link>
-                <Link
-                  to="/settings"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-md px-6 py-4 text-on-surface hover:bg-surface-variant transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[24px]">settings</span>
-                  <span className="font-title-sm text-title-sm font-medium">Settings</span>
-                </Link>
-              </nav>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <main className="flex-1 w-full max-w-screen-2xl mx-auto pt-[56px] md:pt-[64px]">
+      <main className="flex-1 w-full max-w-screen-2xl mx-auto">
         <Outlet />
       </main>
 
@@ -169,6 +108,7 @@ export default function Layout() {
                 className={`flex flex-col items-center justify-center p-2 min-w-[64px] transition-colors ${
                   isActive ? 'text-primary' : 'text-on-surface-variant'
                 }`}
+                aria-label={`Go to ${link.name}`}
               >
                 <span 
                   className="material-symbols-outlined text-[24px] mb-1 transition-transform"
@@ -199,6 +139,43 @@ export default function Layout() {
           </nav>
         </div>
       </footer>
+
+      {/* Back to Top */}
+      <button 
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className={`fixed bottom-[calc(80px+16px)] md:bottom-6 right-5 w-11 h-11 rounded-full bg-surface-container-highest border border-outline text-on-surface flex items-center justify-center shadow-lg z-50 transition-all duration-300 ${showBackToTop ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'}`}
+        aria-label="Back to top"
+      >
+        <span className="material-symbols-outlined absolute" style={{ fontVariationSettings: "'wght' 300" }}>arrow_upward</span>
+      </button>
+
+      {/* Mobile Drawer */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden z-[100] relative">
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="fixed top-0 left-0 bottom-0 w-[280px] bg-surface z-[101] flex flex-col shadow-2xl animate-in slide-in-from-left duration-300">
+            <div className="p-margin-edge flex items-center justify-between border-b border-surface-variant relative z-10 bg-surface">
+              <Link to="/" className="font-display-lg text-[22px] font-black tracking-tighter text-primary uppercase" onClick={() => setIsMobileMenuOpen(false)}>ANIMAX</Link>
+              <button 
+                className="p-2 -mr-2 text-on-surface hover:bg-surface-variant rounded-full transition-colors flex items-center justify-center cursor-pointer"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span className="material-symbols-outlined text-[24px]">close</span>
+              </button>
+            </div>
+            <div className="flex flex-col py-4 px-2 gap-2 overflow-y-auto relative z-10 bg-surface h-full">
+              <Link className="px-5 py-4 text-on-surface hover:bg-surface-variant rounded-lg font-title-sm text-[16px] font-bold" to="/browse" onClick={() => setIsMobileMenuOpen(false)}>Browse All</Link>
+              <Link className="px-5 py-4 text-on-surface hover:bg-surface-variant rounded-lg font-title-sm text-[16px] font-bold" to="/browse/animewitcher" onClick={() => setIsMobileMenuOpen(false)}>Anime</Link>
+              <Link className="px-5 py-4 text-on-surface hover:bg-surface-variant rounded-lg font-title-sm text-[16px] font-bold" to="/browse/asia2tv" onClick={() => setIsMobileMenuOpen(false)}>Drama</Link>
+              <Link className="px-5 py-4 text-on-surface hover:bg-surface-variant rounded-lg font-title-sm text-[16px] font-bold" to="/mylist" onClick={() => setIsMobileMenuOpen(false)}>My List</Link>
+              <Link className="px-5 py-4 text-on-surface hover:bg-surface-variant rounded-lg font-title-sm text-[16px] font-bold" to="/settings" onClick={() => setIsMobileMenuOpen(false)}>Settings</Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

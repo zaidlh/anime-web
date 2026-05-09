@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ClassifiedServer, getBestServer } from '../servers';
+import Hls from 'hls.js';
 
 interface VideoPlayerProps {
   servers: ClassifiedServer[];
@@ -11,18 +12,99 @@ interface VideoPlayerProps {
   downloadUrl: string;
   prevEpUrl: string | null;
   nextEpUrl: string | null;
+  onEnded?: () => void;
+  onTimeUpdate?: (time: number, duration: number) => void;
+  initialTime?: number;
 }
 
-export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUrl, downloadUrl, prevEpUrl, nextEpUrl }: VideoPlayerProps) {
+export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUrl, downloadUrl, prevEpUrl, nextEpUrl, onEnded, onTimeUpdate, initialTime }: VideoPlayerProps) {
   const [selectedServer, setSelectedServer] = useState<ClassifiedServer | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [osdMessage, setOsdMessage] = useState<string | null>(null);
+  const [osdIcon, setOsdIcon] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const osdTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showOsd = (icon: string, text: string) => {
+    setOsdIcon(icon);
+    setOsdMessage(text);
+    if (osdTimerRef.current) clearTimeout(osdTimerRef.current);
+    osdTimerRef.current = setTimeout(() => {
+      setOsdMessage(null);
+      setOsdIcon(null);
+    }, 1500);
+  };
 
   useEffect(() => {
     const best = getBestServer(servers);
     setSelectedServer(best);
     setVideoError(null);
   }, [servers]);
+
+  useEffect(() => {
+    if (!selectedServer || selectedServer.capability !== 'native' || !selectedServer.directUrl || !videoRef.current) {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      return;
+    }
+
+    const video = videoRef.current;
+    const url = selectedServer.directUrl;
+
+    if (/\.m3u8(\?.*)?$/i.test(url)) {
+      if (Hls.isSupported()) {
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+        }
+        const hls = new Hls({
+          // Add config here if needed
+        });
+        hlsRef.current = hls;
+
+        hls.loadSource(url);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.error("fatal network error encountered, try to recover");
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.error("fatal media error encountered, try to recover");
+                hls.recoverMediaError();
+                break;
+              default:
+                hls.destroy();
+                setVideoError("The video stream could not be loaded via HLS. Please try selecting a different server.");
+                break;
+            }
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Fallback for native Safari HLS support
+        video.src = url;
+      }
+    } else {
+      // Standard MP4/WebM
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      video.src = url;
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [selectedServer]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -36,8 +118,13 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
         case ' ':
         case 'k':
           e.preventDefault();
-          if (video.paused) video.play();
-          else video.pause();
+          if (video.paused) {
+            video.play();
+            showOsd('play_arrow', 'Play');
+          } else {
+            video.pause();
+            showOsd('pause', 'Pause');
+          }
           break;
         case 'f':
           e.preventDefault();
@@ -47,13 +134,30 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
             video.requestFullscreen();
           }
           break;
+        case 'm':
+          e.preventDefault();
+          video.muted = !video.muted;
+          showOsd(video.muted ? 'volume_off' : 'volume_up', video.muted ? 'Muted' : 'Unmuted');
+          break;
+        case 'arrowup':
+          e.preventDefault();
+          video.volume = Math.min(1, video.volume + 0.1);
+          showOsd('volume_up', `${Math.round(video.volume * 100)}%`);
+          break;
+        case 'arrowdown':
+          e.preventDefault();
+          video.volume = Math.max(0, video.volume - 0.1);
+          showOsd('volume_down', `${Math.round(video.volume * 100)}%`);
+          break;
         case 'arrowright':
           e.preventDefault();
           video.currentTime += 10;
+          showOsd('forward_10', 'Seek +10s');
           break;
         case 'arrowleft':
           e.preventDefault();
           video.currentTime -= 10;
+          showOsd('replay_10', 'Seek -10s');
           break;
       }
     };
@@ -69,7 +173,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
 
   return (
     <div className="flex flex-col gap-lg">
-      <section className="w-full aspect-video bg-black md:rounded-xl overflow-hidden border-b md:border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20 -mx-4 md:mx-0">
+      <section className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20">
         {!selectedServer ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center backdrop-blur-sm bg-black/60">
             <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-4">open_in_new</span>
@@ -98,16 +202,39 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               controls
               preload="metadata"
               poster={poster || undefined}
-              src={selectedServer.directUrl as string}
-              {...({ referrerPolicy: 'no-referrer' } as React.HTMLAttributes<HTMLVideoElement>)}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover outline-none"
               onError={(e) => {
-                console.error("Video error:", e.type);
+                const target = e.target as HTMLVideoElement;
+                if (!target.error) return; // ignore generic events if error details are missing
+                console.error("Video error:", target.error.message, target.error.code);
                 setVideoError("The video stream could not be loaded. Please try selecting a different server.");
+              }}
+              onEnded={onEnded}
+              onLoadedMetadata={(e) => {
+                const target = e.target as HTMLVideoElement;
+                if (initialTime && initialTime > 0 && target.duration > initialTime + 10) {
+                  target.currentTime = initialTime;
+                }
+              }}
+              onTimeUpdate={() => {
+                if (videoRef.current && onTimeUpdate) {
+                  onTimeUpdate(videoRef.current.currentTime, videoRef.current.duration || 0);
+                }
               }}
             >
               Your browser does not support the video tag.
             </video>
+            
+            {/* OSD */}
+            {osdMessage && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 transition-opacity duration-300">
+                <div className="bg-black/60 backdrop-blur-md text-white rounded-2xl flex flex-col items-center justify-center p-6 min-w-[120px]">
+                  <span className="material-symbols-outlined text-[48px] mb-2">{osdIcon}</span>
+                  <span className="font-title-sm font-bold">{osdMessage}</span>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="relative w-full h-full">
@@ -115,9 +242,9 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               src={selectedServer.embedUrl as string}
               allowFullScreen
               referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups"
               className="w-full h-full border-0"
               title={`${title} - ${episodeName}`}
-              sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
             />
             <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-label-caps font-bold pointer-events-none">
               Playing from {selectedServer.name}
@@ -126,15 +253,15 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
         )}
       </section>
 
-      <div className="flex flex-col lg:flex-row justify-between items-start gap-md mb-xl px-4 md:px-0">
-        <div className="flex-1 w-full">
-          <h1 className="font-display-lg text-[20px] sm:text-[32px] text-on-surface mb-xs leading-tight font-black line-clamp-2 md:line-clamp-none">{episodeName}</h1>
-          <p className="font-title-sm text-on-surface-variant/80 text-sm md:text-base">
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-md mb-xl">
+        <div className="flex-1">
+          <h1 className="font-display-lg text-[22px] sm:text-[32px] text-on-surface mb-xs leading-tight font-black line-clamp-2 md:line-clamp-none">{episodeName}</h1>
+          <p className="font-title-sm text-on-surface-variant/80">
             Part of <Link className="text-primary hover:text-primary-container font-bold transition-all underline decoration-primary/30 underline-offset-4" to={titleDetailUrl}>{title}</Link>
           </p>
 
-          <div className="flex items-center mt-md overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="inline-flex rounded-xl border border-outline-variant/30 bg-surface-container-low overflow-hidden shadow-lg shrink-0">
+          <div className="flex items-center mt-md">
+            <div className="inline-flex rounded-xl border border-outline-variant/30 bg-surface-container-low overflow-hidden shadow-lg">
               {prevEpUrl ? (
                 <Link to={prevEpUrl} className="flex items-center gap-xs px-md py-3 hover:bg-surface-variant transition-all font-title-sm text-on-surface border-r border-outline-variant/30 font-bold">
                   <span className="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -167,17 +294,36 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
           </div>
         </div>
 
-        <div className="w-full lg:w-auto mt-md lg:mt-0">
-          <Link to={downloadUrl} className="w-full lg:w-auto flex items-center justify-center gap-sm px-lg py-4 rounded-xl bg-primary-container text-on-primary-container font-headline-md text-[18px] shadow-xl hover:brightness-110 active:scale-[0.98] transition-all font-bold">
+        <div className="w-full lg:w-auto mt-md lg:mt-0 flex flex-col sm:flex-row items-center gap-sm">
+          <Link to={downloadUrl} aria-label="Download Episode" className="w-full sm:w-auto flex-1 flex items-center justify-center gap-sm px-lg py-4 rounded-xl bg-primary-container text-on-primary-container font-headline-md text-[18px] shadow-xl hover:brightness-110 active:scale-[0.98] transition-all font-bold">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'wght' 600" }}>download</span>
-            Download Episode
+            Download
           </Link>
+          <button 
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: `${title} - ${episodeName}`,
+                  text: `Check out ${episodeName} of ${title} on Animax!`,
+                  url: window.location.href,
+                }).catch(console.error);
+              } else {
+                navigator.clipboard.writeText(window.location.href);
+                // We don't have useToast here, but clipboard fallback works
+              }
+            }}
+            aria-label="Share this episode"
+            className="w-full sm:w-auto flex-1 flex items-center justify-center gap-sm px-lg py-4 rounded-xl bg-surface-container-high border border-outline text-on-surface font-headline-md text-[18px] shadow-xl hover:bg-surface-variant active:scale-[0.98] transition-all font-bold"
+          >
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'wght' 600" }}>share</span>
+            Share
+          </button>
         </div>
       </div>
 
-      <div className="mb-md px-4 md:px-0">
-        <h3 className="font-label-caps text-label-caps text-primary/70 tracking-[0.2em] uppercase mb-sm font-bold text-[10px] md:text-xs">Select Streaming Server</h3>
-        <div className="flex flex-wrap gap-3 md:gap-md">
+      <div className="mb-md">
+        <h3 className="font-label-caps text-label-caps text-primary/70 tracking-[0.2em] uppercase mb-sm font-bold">Select Streaming Server</h3>
+        <div className="flex flex-wrap gap-md">
           {allServers.map((s, i) => {
             const isSelected = selectedServer && selectedServer.name === s.name && selectedServer.quality === s.quality;
             return (

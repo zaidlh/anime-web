@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, getDocs, onSnapshot } from 'firebase/firestore';
 import { db, auth } from './firebase';
 
 export interface ListItem {
@@ -28,16 +28,9 @@ export function useMyList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Store cleanup functions externally since Firebase ignores returns from onAuthStateChanged
-    let innerCleanup: (() => void) | null = null;
-
+    // If we're not using Firebase auth listener immediately, 
+    // we can rely on auth.currentUser changing or just local storage
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
-      // Always clean up previous listeners before creating new ones
-      if (innerCleanup) {
-        innerCleanup();
-        innerCleanup = null;
-      }
-
       if (user) {
         // Fetch from Firebase real-time
         const listRef = collection(db, 'users', user.uid, 'myList');
@@ -55,8 +48,7 @@ export function useMyList() {
           console.error("Error fetching myList:", error);
           setLoading(false);
         });
-        // Store cleanup externally instead of returning
-        innerCleanup = unsubscribeSnapshot;
+        return () => unsubscribeSnapshot();
       } else {
         // Fetch from LocalStorage
         setList(getMyListLocal());
@@ -66,20 +58,14 @@ export function useMyList() {
         const handleStorage = () => setList(getMyListLocal());
         window.addEventListener('storage', handleStorage);
         const interval = setInterval(handleStorage, 1000); // fallback for same-tab
-        // Store cleanup externally
-        innerCleanup = () => {
+        return () => {
           window.removeEventListener('storage', handleStorage);
           clearInterval(interval);
         };
       }
     });
 
-    return () => {
-      // Clean up inner listener first
-      if (innerCleanup) innerCleanup();
-      // Clean up auth listener
-      unsubscribeAuth();
-    };
+    return () => unsubscribeAuth();
   }, []);
 
   return { list, loading };

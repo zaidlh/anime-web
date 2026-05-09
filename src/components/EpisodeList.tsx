@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { AnimeWitcherEpisode, Asia2TVEpisode, ServerInfo, SourceType } from '../lib/data';
 import { classifyServerUrl } from '../servers';
 import { encodeBase64Url } from '../lib/utils';
+import { useHistory } from '../lib/history';
+import { LazyImage } from './LazyImage';
 
 interface EpisodeListProps {
   source: SourceType;
@@ -12,6 +14,7 @@ interface EpisodeListProps {
 
 export function EpisodeList({ source, titleId, episodes }: EpisodeListProps) {
   const encId = source === 'animewitcher' ? encodeURIComponent(titleId) : encodeBase64Url(titleId);
+  const { isCompleted, markCompleted } = useHistory();
 
   return (
     <section className="mt-8 md:mt-12">
@@ -43,15 +46,17 @@ export function EpisodeList({ source, titleId, episodes }: EpisodeListProps) {
           const serversInfo: ServerInfo[] = ep.servers || [];
           const classified = serversInfo.map((s: any) => classifyServerUrl(s.link || s.url || '', s.name, s.quality || null));
           const downlodableServers = classified.filter(c => c.capability === 'native' && c.directUrl);
+          const hasDownload = downlodableServers.length > 0;
 
           const epId = source === 'animewitcher' ? (ep.doc_id || num) : num;
           const watchUrl = `/watch/${source}/${encId}/${epId}`;
+          const completed = isCompleted(source, titleId, epId);
 
           return (
-            <Link key={idx} to={watchUrl} className="group flex flex-col gap-3">
-              <div className="w-full aspect-video rounded-xl overflow-hidden bg-surface-container-high relative border border-transparent group-hover:border-outline transition-colors shadow-lg">
+            <div key={idx} className="group flex flex-col gap-3 relative">
+              <Link to={watchUrl} className="w-full aspect-video rounded-xl overflow-hidden bg-surface-container-high relative border border-transparent group-hover:border-outline transition-colors shadow-lg block">
                 {source === 'animewitcher' && ep.thumb ? (
-                  <img src={ep.thumb} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  <LazyImage src={ep.thumb} alt={name} containerClassName="w-full h-full" className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${completed ? 'brightness-50' : ''}`} />
                 ) : (
                    <div className="w-full h-full bg-surface-container flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
                       <span className="material-symbols-outlined text-outline-variant text-[48px]">movie</span>
@@ -65,22 +70,39 @@ export function EpisodeList({ source, titleId, episodes }: EpisodeListProps) {
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                    <span className="material-symbols-outlined text-white text-[48px] drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
                 </div>
-                {/* Progress bar simulation for "Continue Watching" feel */}
+                {/* Progress bar simulation for "Continue Watching" feel or Completed */}
                 <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/20">
-                  {idx === 0 && <div className="h-full bg-primary w-1/3"></div>}
+                  {completed && <div className="h-full bg-primary w-full"></div>}
                 </div>
-              </div>
+              </Link>
               
               <div className="flex flex-col">
-                <h4 className="font-title-sm text-[16px] md:text-[18px] font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-1">
-                  {num}. {name}
-                </h4>
-                <p className="font-body-md text-sm text-on-surface-variant line-clamp-2 mt-1">
-                  {/* We don't have episode descriptions in the data schema, so we use a fallback or show quality tags */}
-                  {classified.filter(c => c.quality).slice(0, 3).map(c => c.quality).join(' • ') || 'Standard Definition'}
-                </p>
+                <div className="flex items-start justify-between gap-2">
+                  <Link to={watchUrl} className="font-title-sm text-[16px] md:text-[18px] font-semibold text-on-surface hover:text-primary transition-colors line-clamp-1 flex-1 flex items-center gap-2">
+                    {num}. {name}
+                    {completed && <span className="material-symbols-outlined text-primary text-[18px]" title="Watched" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>}
+                  </Link>
+                  {hasDownload && (
+                     <a href={downlodableServers[0].directUrl!} download onClick={(e) => e.stopPropagation()} target="_blank" rel="noreferrer" title="Quick Download" className="text-on-surface-variant hover:text-white bg-surface-container hover:bg-surface-variant p-1.5 rounded-full transition-colors flex items-center justify-center -mt-1">
+                       <span className="material-symbols-outlined text-[18px]">download</span>
+                     </a>
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="font-body-md text-sm text-on-surface-variant line-clamp-1">
+                    {classified.filter(c => c.quality).slice(0, 3).map(c => c.quality).join(' • ') || 'Standard Definition'}
+                  </p>
+                  {!completed && (
+                    <button 
+                      onClick={(e) => { e.preventDefault(); markCompleted(source, titleId, epId); }}
+                      className="text-xs font-bold text-on-surface-variant hover:text-primary transition-colors uppercase tracking-wider"
+                    >
+                      Mark Watched
+                    </button>
+                  )}
+                </div>
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>

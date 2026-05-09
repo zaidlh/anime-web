@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { SourceType } from '../lib/data';
 import { encodeBase64Url } from '../lib/utils';
+import { LazyImage } from './LazyImage';
 
 interface PosterCardProps {
   key?: React.Key;
@@ -26,7 +27,7 @@ export function PosterCard({ id, source, title, subtitle, poster, type, tags, ep
     <Link to={detailUrl} className={`group relative block rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.03] shadow-lg hover:shadow-primary/20 hover:z-10 bg-surface-container ${featured ? 'col-span-2 row-span-2' : ''}`}>
       <div className="relative w-full h-full aspect-[2/3]">
         {poster ? (
-          <img src={poster} alt={title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+          <LazyImage src={poster} alt={title} containerClassName="w-full h-full" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-surface-container">
             <span className="material-symbols-outlined text-[48px] text-outline-variant">movie</span>

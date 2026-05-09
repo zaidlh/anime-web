@@ -4,12 +4,16 @@ import { useTitleById, SourceType } from '../lib/data';
 import { decodeBase64Url, safeDecodeURIComponent } from '../lib/utils';
 import { EpisodeList } from '../components/EpisodeList';
 import { useIsInList, addToList, removeFromList } from '../lib/list';
+import { addRecentlyViewed } from '../lib/recent';
+import { useToast } from '../components/Toast';
+import { SkeletonHero, SkeletonEpisodeGrid } from '../components/Skeleton';
 
 export default function TitleDetail() {
   const { source, id } = useParams<{ source: string; id: string }>();
   
   const decodedId = source === 'animewitcher' ? safeDecodeURIComponent(id || '') : decodeBase64Url(id || '');
   const { title, loading } = useTitleById(source as SourceType, decodedId);
+  const { showToast } = useToast();
 
   const isAnime = source === 'animewitcher';
   const t = title as any;
@@ -17,9 +21,22 @@ export default function TitleDetail() {
 
   const inList = useIsInList(decodedId, source || '');
 
+  useEffect(() => {
+    if (t) {
+      addRecentlyViewed({
+        source: source!,
+        id: decodedId,
+        title: displayTitle,
+        poster: t?.poster || null,
+        type: t?.type || (isAnime ? null : 'Drama')
+      });
+    }
+  }, [t, source, decodedId, displayTitle, isAnime]);
+
   const toggleList = async () => {
     if (inList) {
       await removeFromList(decodedId, source || '');
+      showToast('Removed from List', 'default');
     } else {
       await addToList({
         id: decodedId,
@@ -28,13 +45,29 @@ export default function TitleDetail() {
         poster: t?.poster || null,
         type: t?.type || null
       });
+      showToast('Added to My List', 'success');
+    }
+  };
+
+  const handleShare = async () => {
+    const fullUrl = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: displayTitle, url: fullUrl });
+      } catch (err) {}
+    } else {
+      await navigator.clipboard.writeText(fullUrl);
+      showToast('Link copied to clipboard ✓', 'success');
     }
   };
 
   if (loading) {
     return (
-      <div className="w-full h-screen flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="w-full relative pb-xl">
+        <SkeletonHero />
+        <div className="px-margin-edge max-w-screen-2xl mx-auto flex flex-col gap-8">
+          <SkeletonEpisodeGrid count={8} />
+        </div>
       </div>
     );
   }
@@ -74,17 +107,17 @@ export default function TitleDetail() {
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/30 to-background/90 md:to-transparent"></div>
       </div>
 
-      <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-margin-edge pt-[20vh] sm:pt-[30vh] md:pt-[45vh] pb-xl flex flex-col md:flex-row gap-lg items-end md:items-start">
+      <div className="relative z-10 max-w-[1200px] mx-auto px-margin-edge pt-[30vh] md:pt-[45vh] pb-xl flex flex-col md:flex-row gap-lg items-end md:items-start">
         
-        {/* Mobile Poster */}
-        <div className="md:hidden w-[140px] sm:w-[180px] aspect-[2/3] rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl mx-auto -mb-12 relative z-20">
-          <img src={t.poster} className="w-full h-full object-cover" alt={displayTitle} />
-        </div>
+        {/* Mobile Poster (Optional, if we want to show it on mobile) */}
+        {/* <div className="md:hidden w-1/3 aspect-[2/3] rounded-lg overflow-hidden border border-outline-variant shadow-2xl mx-auto mb-4">
+          <img src={t.poster} className="w-full h-full object-cover" />
+        </div> */}
 
         {/* Content */}
-        <div className="flex-1 w-full flex flex-col gap-md text-center md:text-left pt-16 md:pt-0">
+        <div className="flex-1 w-full flex flex-col gap-md text-center md:text-left pt-12 md:pt-0">
           
-          <div className="flex items-center justify-center md:justify-start gap-3 md:gap-4 mb-1 md:mb-2 flex-wrap">
+          <div className="flex items-center justify-center md:justify-start gap-4 mb-2 flex-wrap">
             <span className="bg-primary/20 text-primary px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase border border-primary/30">
               {t.type || (isAnime ? 'Anime' : 'Drama')}
             </span>
@@ -95,7 +128,7 @@ export default function TitleDetail() {
             <span className="text-on-surface-variant/60 text-sm font-medium">{t.year || '2024'}</span>
           </div>
 
-          <h1 className="font-display-lg text-[24px] sm:text-[36px] md:text-[56px] font-black text-on-surface tracking-tighter leading-[1.1] drop-shadow-lg">
+          <h1 className="font-display-lg text-[28px] sm:text-[36px] md:text-[56px] font-black text-on-surface tracking-tighter leading-[1.1] drop-shadow-lg">
             {displayTitle}
           </h1>
           
@@ -114,34 +147,41 @@ export default function TitleDetail() {
             {story || 'No synopsis available.'}
           </p>
 
-          <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-6 md:mt-8 max-w-[32rem] mx-auto md:mx-0 w-full">
+          <div className="flex flex-wrap items-center gap-3 mt-8 max-w-[32rem] mx-auto md:mx-0 w-full">
             {firstEpId && (
               <Link 
                 to={watchUrl}
-                className="w-full sm:w-auto sm:flex-1 bg-primary text-black font-title-sm px-6 py-3 md:py-4 rounded-full flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-[0_0_20px_rgba(255,77,77,0.3)] font-bold tracking-wide whitespace-nowrap text-sm md:text-base"
+                className="w-auto flex-1 bg-primary text-black font-title-sm px-6 py-4 rounded-full flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-[0_0_20px_rgba(255,77,77,0.3)] font-bold tracking-wide whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 WATCH NOW
               </Link>
             )}
-            <div className="flex gap-2 w-full sm:w-auto sm:flex-1">
-              <button 
-                onClick={toggleList}
-                className="flex-1 bg-surface-container-high/50 backdrop-blur-md border border-outline flex items-center justify-center gap-2 text-on-surface font-title-sm px-4 md:px-6 py-3 md:py-4 rounded-full transition-all active:scale-95 font-bold tracking-wide hover:bg-surface-variant whitespace-nowrap text-sm md:text-base"
-              >
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: inList ? "'FILL' 1" : "'FILL' 0" }}>
-                  {inList ? 'check' : 'add'}
-                </span>
-                {inList ? 'IN LIST' : 'MY LIST'}
-              </button>
-              <Link 
-                to={`/download/${source}/${encodeURIComponent(id || '')}`}
-                className="flex-none bg-surface-container-high/50 backdrop-blur-md border border-outline flex items-center justify-center text-on-surface font-title-sm px-4 md:px-6 py-3 md:py-4 rounded-full transition-all active:scale-95 font-bold tracking-wide hover:bg-surface-variant"
-                title="Download"
-              >
-                <span className="material-symbols-outlined text-[20px]">download</span>
-              </Link>
-            </div>
+            <button 
+              onClick={toggleList}
+              className="w-auto flex-1 bg-surface-container-high/50 backdrop-blur-md border border-outline flex items-center justify-center gap-2 text-on-surface font-title-sm px-6 py-4 rounded-full transition-all active:scale-95 font-bold tracking-wide hover:bg-surface-variant whitespace-nowrap"
+            >
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: inList ? "'FILL' 1" : "'FILL' 0" }}>
+                {inList ? 'check' : 'add'}
+              </span>
+              {inList ? 'IN LIST' : 'MY LIST'}
+            </button>
+            <Link 
+              to={`/download/${source}/${encodeURIComponent(id || '')}`}
+              className="w-auto flex-none bg-surface-container-high/50 backdrop-blur-md border border-outline flex items-center justify-center text-on-surface font-title-sm px-6 py-4 rounded-full transition-all active:scale-95 font-bold tracking-wide hover:bg-surface-variant"
+              title="Download"
+              aria-label="Download this title"
+            >
+              <span className="material-symbols-outlined text-[20px]">download</span>
+            </Link>
+            <button 
+              onClick={handleShare}
+              className="w-auto flex-none bg-surface-container-high/50 backdrop-blur-md border border-outline flex items-center justify-center text-on-surface font-title-sm px-6 py-4 rounded-full transition-all active:scale-95 font-bold tracking-wide hover:bg-surface-variant"
+              title="Share"
+              aria-label="Share this title"
+            >
+              <span className="material-symbols-outlined text-[20px]">share</span>
+            </button>
           </div>
 
         </div>

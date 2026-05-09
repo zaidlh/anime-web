@@ -4,11 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="no-referrer" />
-    <title>My Google AI Studio App</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https: blob:; media-src 'self' data: https: blob:; frame-src 'self' https:;" />
+    <meta name="theme-color" content="#ff4d4d"/>
+    <link rel="manifest" href="/manifest.json" />
+    <title>Animax Catalog</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(
+            (registration) => {
+              console.log('SW registered: ', registration);
+            },
+            (err) => {
+              console.log('SW registration failed: ', err);
+            }
+          );
+        });
+      }
+    </script>
   </body>
 </html>
 

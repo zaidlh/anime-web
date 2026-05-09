@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../components/Toast';
 
 export default function Settings() {
   const [quality, setQuality] = useState('best');
   const [downloadPath, setDownloadPath] = useState('');
+  const { showToast } = useToast();
 
   useEffect(() => {
     // We could persist these in localStorage if they were globally used.
@@ -13,6 +15,7 @@ export default function Settings() {
   const saveQuality = (q: string) => {
     setQuality(q);
     localStorage.setItem('cs_pref_quality', q);
+    showToast(`Default quality set to ${q}`);
   };
 
   return (
