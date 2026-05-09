@@ -40,8 +40,8 @@ export default function Search() {
   // If we have a query, show results:
   if (q) {
     return (
-      <div className="max-w-[1200px] mx-auto px-margin-edge py-lg min-h-[80vh]">
-        <div className="mb-xl sm:hidden">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-margin-edge py-6 md:py-lg min-h-[80vh]">
+        <div className="mb-8 md:mb-xl sm:hidden">
           <form onSubmit={handleSearch} className="flex flex-row items-center bg-[#1E1E1E] border border-[#2D2D2D] rounded-xl px-4 py-3 relative">
             <span className="material-symbols-outlined text-[#8E8E8E] mr-3">search</span>
             <input
@@ -61,9 +61,9 @@ export default function Search() {
           </form>
         </div>
 
-        <div className="mb-xl mt-4 sm:mt-0">
-          <h1 className="font-display-lg text-[28px] sm:text-[36px] font-bold text-white mb-2">Search Results for "{q}"</h1>
-          <p className="font-body-md text-[#8E8E8E]">{total} titles found</p>
+        <div className="mb-8 md:mb-xl mt-4 sm:mt-0">
+          <h1 className="font-display-lg text-[24px] sm:text-[36px] font-bold text-white mb-2">Search Results for "{q}"</h1>
+          <p className="font-body-md text-[#8E8E8E] text-sm md:text-base">{total} titles found</p>
         </div>
 
         {total === 0 && (
@@ -116,9 +116,9 @@ export default function Search() {
   const ratingMock = [4.9, 4.7, 4.8, 4.5];
 
   return (
-    <div className="w-full max-w-[1200px] mx-auto min-h-[90vh] bg-[#101010] flex flex-col pt-4 px-4 sm:px-6 pb-24">
+    <div className="w-full max-w-[1200px] mx-auto min-h-[90vh] bg-[#101010] flex flex-col pt-4 px-4 md:px-6 pb-24">
       {/* Search Input Bar */}
-      <form onSubmit={handleSearch} className="flex flex-row items-center bg-[#1E1E1E] border border-[#2D2D2D] rounded-xl px-4 py-3 relative mb-8">
+      <form onSubmit={handleSearch} className="flex flex-row items-center bg-[#1E1E1E] border border-[#2D2D2D] rounded-xl px-4 py-3 relative mb-6 md:mb-8">
         <span className="material-symbols-outlined text-[#8E8E8E] mr-3">search</span>
         <input
           type="text"

@@ -45,10 +45,10 @@ export default function Browse() {
   const totalCount = animeCount + dramaCount;
 
   return (
-    <div className="max-w-[1200px] mx-auto px-margin-edge py-lg">
-      <div className="mb-xl bg-surface-container border border-surface-variant rounded-2xl p-xl shadow-sm text-center">
-        <h1 className="font-display-lg text-[36px] font-bold text-on-surface mb-2 tracking-tighter">{sourceName}</h1>
-        <p className="font-body-md text-on-surface-variant font-bold flex items-center justify-center gap-2">
+    <div className="max-w-[1200px] mx-auto px-4 md:px-margin-edge py-6 md:py-lg">
+      <div className="mb-8 md:mb-xl bg-surface-container border border-surface-variant rounded-2xl p-6 md:p-xl shadow-sm text-center">
+        <h1 className="font-display-lg text-[28px] md:text-[36px] font-bold text-on-surface mb-2 tracking-tighter">{sourceName}</h1>
+        <p className="font-body-md text-on-surface-variant font-bold flex items-center justify-center gap-2 text-sm md:text-base">
           <span className="material-symbols-outlined text-primary text-[20px]">movie</span>
           {items.length} titles available
         </p>
@@ -56,10 +56,10 @@ export default function Browse() {
 
       {/* Tabs for Browse All page */}
       {!source && (
-        <div className="flex justify-center gap-2 mb-xl">
+        <div className="flex justify-center gap-2 mb-8 md:mb-xl overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-6 py-3 rounded-full font-title-sm font-bold transition-colors ${
+            className={`px-5 md:px-6 py-2.5 md:py-3 rounded-full font-title-sm font-bold transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'all' 
                 ? 'bg-primary text-on-primary' 
                 : 'bg-surface-container text-on-surface-variant hover:bg-surface-variant'
@@ -69,7 +69,7 @@ export default function Browse() {
           </button>
           <button
             onClick={() => setActiveTab('anime')}
-            className={`px-6 py-3 rounded-full font-title-sm font-bold transition-colors ${
+            className={`px-5 md:px-6 py-2.5 md:py-3 rounded-full font-title-sm font-bold transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'anime' 
                 ? 'bg-primary text-on-primary' 
                 : 'bg-surface-container text-on-surface-variant hover:bg-surface-variant'
@@ -79,7 +79,7 @@ export default function Browse() {
           </button>
           <button
             onClick={() => setActiveTab('drama')}
-            className={`px-6 py-3 rounded-full font-title-sm font-bold transition-colors ${
+            className={`px-5 md:px-6 py-2.5 md:py-3 rounded-full font-title-sm font-bold transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'drama' 
                 ? 'bg-primary text-on-primary' 
                 : 'bg-surface-container text-on-surface-variant hover:bg-surface-variant'
