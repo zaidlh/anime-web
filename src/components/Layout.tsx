@@ -59,7 +59,10 @@ export default function Layout() {
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
-            <Link to="/" className="font-display-lg text-[22px] md:text-[24px] font-black tracking-tighter text-primary uppercase" aria-label="Animax Home">
+            <Link to="/" className="md:hidden font-display-lg text-[18px] font-bold tracking-tight text-on-surface" aria-label="Animax Home">
+              Home
+            </Link>
+            <Link to="/" className="hidden md:block font-display-lg text-[24px] font-black tracking-tighter text-primary uppercase" aria-label="Animax Home">
               ANIMAX
             </Link>
             <nav className="hidden md:flex items-center gap-md ml-lg">
@@ -71,66 +74,7 @@ export default function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative hidden sm:block">
-              <form 
-                onSubmit={handleSearch} 
-                className="flex items-center bg-white/5 border border-white/10 hover:border-primary/50 focus-within:border-primary/50 focus-within:bg-white/10 transition-all duration-300 rounded-full px-4 py-1.5"
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              >
-                <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-                <input
-                  type="search"
-                  className="bg-transparent border-none focus:ring-0 text-sm font-medium text-on-surface placeholder:text-on-surface-variant w-40 lg:w-64 ml-2 focus:outline-none"
-                  placeholder="Search titles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </form>
-              
-              {showSuggestions && searchQuery.trim().length > 1 && (
-                <div className="absolute top-full left-0 right-0 mt-2 glass-dark rounded-xl overflow-hidden shadow-2xl border border-white/10 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="max-h-[400px] overflow-y-auto py-2">
-                    {searchResults.animewitcher.slice(0, 5).map(item => (
-                      <Link 
-                        key={item.id} 
-                        to={`/title/animewitcher/${encodeURIComponent(item.id)}`}
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors"
-                      >
-                        <img src={item.poster || ''} className="w-10 h-14 object-cover rounded" alt="" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-on-surface truncate">{item.english_title || item.name}</p>
-                          <p className="text-xs text-on-surface-variant">Anime</p>
-                        </div>
-                      </Link>
-                    ))}
-                    {searchResults.asia2tv.slice(0, 5).map(item => (
-                      <Link 
-                        key={item.id} 
-                        to={`/title/asia2tv/${encodeBase64Url(item.id)}`}
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors"
-                      >
-                        <img src={item.poster || ''} className="w-10 h-14 object-cover rounded" alt="" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-on-surface truncate">{item.title}</p>
-                          <p className="text-xs text-on-surface-variant">Drama</p>
-                        </div>
-                      </Link>
-                    ))}
-                    {searchResults.animewitcher.length === 0 && searchResults.asia2tv.length === 0 && (
-                      <div className="px-4 py-3 text-sm text-on-surface-variant text-center">No results found</div>
-                    )}
-                  </div>
-                  <button 
-                    onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery)}`)}
-                    className="w-full py-2 bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors border-t border-white/5"
-                  >
-                    View all results
-                  </button>
-                </div>
-              )}
-            </div>
-            <Link to="/search" className="sm:hidden hover:bg-surface-variant transition-all duration-200 p-2 text-on-surface-variant hover:text-on-surface rounded-full flex items-center justify-center">
+            <Link to="/search" className="hover:bg-surface-variant transition-all duration-200 p-2 text-on-surface-variant hover:text-on-surface rounded-full flex items-center justify-center">
               <span className="material-symbols-outlined text-[24px]" title="Search">search</span>
             </Link>
             <Link to="/profile" className="hidden md:flex hover:bg-surface-variant transition-all duration-200 p-2 text-on-surface-variant hover:text-on-surface rounded-full items-center justify-center overflow-hidden">

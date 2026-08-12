@@ -1,21 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAllTitles } from '../lib/data';
 import { PosterCard } from '../components/PosterCard';
 import { SkeletonHero, SkeletonPosterGrid } from '../components/Skeleton';
 import { useHistory } from '../lib/history';
-import { useRecentlyViewed } from '../lib/recent';
+import { SectionHeader } from '../components/SectionHeader';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function Home() {
   const { animewitcher, asia2tv, loading } = useAllTitles();
   const { history } = useHistory();
-  const { recent } = useRecentlyViewed();
+  const [heroIndex, setHeroIndex] = useState(0);
   
+  const trending = animewitcher.slice(0, 7);
+  
+  useEffect(() => {
+    if (trending.length === 0) return;
+    const timer = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % trending.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [trending.length]);
+
   if (loading) {
     return (
       <div className="w-full relative pb-xl">
         <SkeletonHero />
-        <div className="px-margin-edge max-w-screen-2xl mx-auto flex flex-col gap-12">
+        <div className="px-4 md:px-margin-edge max-w-screen-2xl mx-auto flex flex-col gap-12">
           <SkeletonPosterGrid count={6} />
           <SkeletonPosterGrid count={12} />
         </div>
@@ -28,176 +39,94 @@ export default function Home() {
   
   const historyItems = Object.values(history).sort((a, b) => b.updatedAt - a.updatedAt).filter(i => !i.completed);
   const continueWatchingItems = historyItems.slice(0, 6);
-  const heroItem = animes[0];
-
-  // We'll use the first drama as the featured top rated item
-  const featuredItem = dramas[0];
-  const topRatedItems = dramas.slice(1, 5);
 
   return (
-    <div className="w-full relative pb-12">
-      {/* Hero Section */}
-      <section className="relative w-full h-[85vh] md:h-[90vh] flex flex-col justify-end overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img 
-            src={heroItem?.poster || "https://lh3.googleusercontent.com/aida-public/AB6AXuDm2YLCxtMp-83E8KVftRDE138d50-Jrf7UlILOwSpeNDL4Newi94OPQwAhIPOGhLV9Mj_DfuMMxcv5CNwnEdt8Ghx1AUUheXsL4_HtQIWadeR1M9UFeRaKoWRYQGQXyWidKsTNTpH73IKZ2aCAWEpltnaDQBIFAKCmYDLwSWBrBXM5k7f1NcZ_TqzLbgVwIzxeTjHRZUNpfp45tf6VYcUnHzDr9A8pUN535YwpnJrJCRQNcYX7oOZoQxfxG9WMu4iv3MeJ4EXFKkw"}
-            className="w-full h-full object-cover object-top md:object-center opacity-80 mix-blend-lighten"
-            alt="Hero background" 
+    <div className="w-full relative pb-24 bg-black">
+      {/* Hero Carousel */}
+      <section className="relative w-full px-4 md:px-margin-edge pt-4 mb-8">
+        <div className="relative aspect-[16/9] md:aspect-[21/9] w-full rounded-2xl overflow-hidden shadow-2xl">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={heroIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0"
+            >
+              <img 
+                src={trending[heroIndex]?.poster || ""} 
+                className="w-full h-full object-cover"
+                alt={trending[heroIndex]?.name}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+              <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 z-10">
+                <h1 className="text-white text-xl md:text-4xl font-black drop-shadow-lg tracking-tight">
+                  {trending[heroIndex]?.english_title || trending[heroIndex]?.name}
+                </h1>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+          
+          <Link 
+            to={trending[heroIndex] ? `/title/animewitcher/${encodeURIComponent(trending[heroIndex].id)}` : '#'}
+            className="absolute inset-0 z-20"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent md:w-3/4"></div>
         </div>
-
-        <div className="relative z-10 px-margin-edge w-full max-w-screen-2xl mx-auto pb-10">
-          <div className="max-w-2xl animate-slide-up">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="bg-primary text-white px-2 py-0.5 rounded-sm font-label-caps text-[10px] uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(255,77,77,0.4)]">
-                Trending #1
-              </span>
-              <span className="text-white/80 font-title-sm text-xs font-semibold tracking-wide">
-                • Available Now
-              </span>
-            </div>
-            
-            <h1 className="font-display-lg text-[28px] sm:text-[40px] md:text-[64px] font-black mb-4 leading-[1.1] text-white drop-shadow-xl tracking-tighter line-clamp-3 md:line-clamp-none">
-              {(heroItem as any)?.english_title || (heroItem as any)?.name || "Welcome to Animax"}
-            </h1>
-            
-            <p className="font-body-md text-sm sm:text-base md:text-lg text-white/90 mb-8 max-w-[36rem] drop-shadow-md">
-              {(heroItem as any)?.story || "Explore a massive collection of anime, dramas, and entertainment without limits."}
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link 
-                to={heroItem ? `/title/animewitcher/${encodeURIComponent((heroItem as any).id)}` : '#'}
-                className="bg-primary text-black px-8 py-3 rounded-full font-title-sm text-sm flex items-center justify-center gap-2 hover:scale-105 transition-transform active:scale-95 shadow-[0_0_20px_rgba(255,77,77,0.3)] font-bold tracking-wide w-auto whitespace-nowrap"
-              >
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-                Watch Now
-              </Link>
-            </div>
-          </div>
+        
+        {/* Pagination Dots */}
+        <div className="flex justify-center gap-2 mt-4">
+          {trending.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setHeroIndex(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === heroIndex ? 'w-6 bg-primary' : 'w-1.5 bg-white/20'}`}
+            />
+          ))}
         </div>
       </section>
 
-      <div className="max-w-screen-2xl mx-auto px-margin-edge">
+      <div className="max-w-screen-2xl mx-auto px-4 md:px-margin-edge">
         
         {/* Continue Watching */}
-        <section className="mb-12 animate-slide-up [animation-delay:200ms]">
-          <div className="flex justify-between items-end mb-6">
-            <h2 className="font-display-lg text-[22px] md:text-[28px] font-bold text-white tracking-tight">Continue Watching</h2>
-            <Link to="/mylist" className="text-primary font-title-sm hover:underline flex items-center gap-1 text-sm font-semibold">
-              View All <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            </Link>
-          </div>
-          
-          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 -mx-margin-edge px-margin-edge md:mx-0 md:px-0">
-            {continueWatchingItems.map((item: any, idx) => {
-              const titleData = [...animewitcher, ...asia2tv].find((t: any) => String(t.id) === String(item.titleId));
-              const titleName = titleData ? (item.source === 'animewitcher' ? ((titleData as any).english_title || (titleData as any).name) : (titleData as any).title) : "Unknown Title";
-              const poster = (titleData as any)?.poster || null;
-              const thumb = (titleData as any)?.thumb || null;
+        {continueWatchingItems.length > 0 && (
+          <section className="mb-10">
+            <SectionHeader title="Continue Watching" viewAllUrl="/mylist" />
+            <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+              {continueWatchingItems.map((item: any, idx) => {
+                const titleData = [...animewitcher, ...asia2tv].find((t: any) => String(t.id) === String(item.titleId));
+                const titleName = titleData ? (item.source === 'animewitcher' ? ((titleData as any).english_title || (titleData as any).name) : (titleData as any).title) : "Unknown Title";
+                const poster = (titleData as any)?.poster || null;
+                const thumb = (titleData as any)?.thumb || null;
 
-              return (
-                <Link 
-                  key={idx} 
-                  to={`/watch/${item.source}/${encodeURIComponent(item.titleId)}/${item.epId}`} 
-                  className="shrink-0 w-[240px] md:w-[320px] group flex flex-col gap-3"
-                >
-                  <div className="w-full aspect-video rounded-xl overflow-hidden bg-surface-container relative border border-transparent group-hover:border-outline transition-colors shadow-lg">
-                    {thumb ? (
-                       <img src={thumb} alt={titleName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                    ) : poster ? (
-                       <img src={poster} alt={titleName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                    ) : (
-                       <div className="w-full h-full flex flex-col items-center justify-center bg-surface-container-high">
-                         <span className="material-symbols-outlined text-[32px] text-outline-variant">movie</span>
-                       </div>
-                    )}
-                    {/* Progress Bar */}
-                    <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/20">
-                      <div className="h-full bg-primary" style={{ width: `${item.duration > 0 ? (item.time / item.duration) * 100 : 0}%` }}></div>
+                return (
+                  <Link 
+                    key={idx} 
+                    to={`/watch/${item.source}/${encodeURIComponent(item.titleId)}/${item.epId}`} 
+                    className="shrink-0 w-[280px] md:w-[340px] bg-surface-container-low rounded-xl overflow-hidden flex items-center p-2 gap-3 border border-white/5 hover:border-white/10 transition-all shadow-lg"
+                  >
+                    <div className="w-[100px] aspect-video rounded-lg overflow-hidden shrink-0 bg-black">
+                      <img src={thumb || poster || ""} alt={titleName} className="w-full h-full object-cover" loading="lazy" />
                     </div>
-                    {/* Play Overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                      <span className="material-symbols-outlined text-white text-[48px] drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+                    <div className="flex-1 min-w-0 pr-2">
+                      <h3 className="text-sm font-bold text-white truncate mb-1">{titleName}</h3>
+                      <p className="text-[11px] text-on-surface-variant font-medium mb-2">Episode {item.epId}</p>
+                      <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: `${item.duration > 0 ? (item.time / item.duration) * 100 : 0}%` }}></div>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="font-title-sm text-[16px] font-bold text-white line-clamp-1">{titleName}</h3>
-                    <p className="font-body-md text-xs text-on-surface-variant flex items-center justify-between mt-1">
-                      <span>Episode {item.epId}</span>
-                      {item.duration > 0 && item.time > 0 && (
-                        <span>{Math.max(1, Math.floor((item.duration - item.time) / 60))}m left</span>
-                      )}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Recently Viewed Strip */}
-        {recent.length > 0 && (
-          <section className="mb-12 animate-slide-up [animation-delay:400ms]">
-            <div className="flex justify-between items-end mb-6">
-              <h2 className="font-display-lg text-[22px] md:text-[28px] font-bold text-white tracking-tight">Recently Viewed</h2>
-            </div>
-            <div className="flex overflow-x-auto no-scrollbar gap-gutter pb-4 -mx-margin-edge px-margin-edge md:mx-0 md:px-0">
-              {recent.map((r, i) => (
-                <div key={i} className="w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] shrink-0">
-                  <PosterCard 
-                    id={r.id as any} 
-                    source={r.source} 
-                    title={r.title} 
-                    poster={r.poster} 
-                    type={r.type as string | undefined} 
-                  />
-                </div>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}
 
-        {/* Top Rated Series */}
-        <section className="mb-12 animate-slide-up [animation-delay:600ms]">
-          <div className="flex justify-between items-end mb-6">
-            <h2 className="font-display-lg text-[22px] md:text-[28px] font-bold text-white tracking-tight">Top Rated Series</h2>
-            <button className="text-on-surface-variant hover:text-white transition-colors">
-              <span className="material-symbols-outlined">grid_view</span>
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {featuredItem && (
-               <PosterCard 
-                 key={featuredItem.id}
-                 id={featuredItem.id}
-                 source="asia2tv"
-                 title={featuredItem.title}
-                 poster={featuredItem.poster}
-                 type="Drama"
-                 tags={featuredItem.tags}
-                 episodeCount={featuredItem.episodes?.length}
-                 featured={true}
-               />
-            )}
-            
-            {topRatedItems.map(t => (
-              <PosterCard 
-                key={t.id}
-                id={t.id}
-                source="asia2tv"
-                title={t.title}
-                poster={t.poster}
-                type="Drama"
-                tags={t.tags}
-                episodeCount={t.episodes?.length}
-              />
-            ))}
-            {animes.slice(3, 7).map(t => (
+        {/* Latest Updates */}
+        <section className="mb-10">
+          <SectionHeader title="Latest Updates" viewAllUrl="/browse/animewitcher" />
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-3 gap-y-6">
+            {animes.slice(0, 6).map(t => (
               <PosterCard 
                 key={t.id}
                 id={t.id}
@@ -207,7 +136,83 @@ export default function Home() {
                 type="Anime"
                 tags={t.tags}
                 episodeCount={t.episodes?.length}
+                badge={t.episodes?.length ? `Ep ${t.episodes.length}` : undefined}
+                badgeColor="bg-primary"
+                showTime={true}
               />
+            ))}
+          </div>
+        </section>
+
+        {/* Most Watched */}
+        <section className="mb-10">
+          <SectionHeader title="Most Watched Anime" viewAllUrl="/browse/animewitcher" />
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-3 gap-y-6">
+            {animes.slice(6, 12).map(t => (
+              <PosterCard 
+                key={t.id}
+                id={t.id}
+                source="animewitcher"
+                title={t.english_title || t.name}
+                poster={t.poster}
+                type="Series"
+                showYear={true}
+                year="2024"
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Latest Added */}
+        <section className="mb-10">
+          <SectionHeader title="Latest Added Works" viewAllUrl="/browse/asia2tv" />
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-3 gap-y-6">
+            {dramas.slice(0, 6).map(t => (
+              <PosterCard 
+                key={t.id}
+                id={t.id}
+                source="asia2tv"
+                title={t.title}
+                poster={t.poster}
+                type="Drama"
+                showYear={true}
+                year="2025"
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Latest News */}
+        <section className="mb-10">
+          <SectionHeader title="Latest News" />
+          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+            {[
+              {
+                title: "MAPPA Studio reveals new project",
+                image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDm2YLCxtMp-83E8KVftRDE138d50-Jrf7UlILOwSpeNDL4Newi94OPQwAhIPOGhLV9Mj_DfuMMxcv5CNwnEdt8Ghx1AUUheXsL4_HtQIWadeR1M9UFeRaKoWRYQGQXyWidKsTNTpH73IKZ2aCAWEpltnaDQBIFAKCmYDLwSWBrBXM5k7f1NcZ_TqzLbgVwIzxeTjHRZUNpfp45tf6VYcUnHzDr9A8pUN535YwpnJrJCRQNcYX7oOZoQxfxG9WMu4iv3MeJ4EXFKkw",
+                time: "2 hours ago"
+              },
+              {
+                title: "Tank Chair Anime PV Released",
+                image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDm2YLCxtMp-83E8KVftRDE138d50-Jrf7UlILOwSpeNDL4Newi94OPQwAhIPOGhLV9Mj_DfuMMxcv5CNwnEdt8Ghx1AUUheXsL4_HtQIWadeR1M9UFeRaKoWRYQGQXyWidKsTNTpH73IKZ2aCAWEpltnaDQBIFAKCmYDLwSWBrBXM5k7f1NcZ_TqzLbgVwIzxeTjHRZUNpfp45tf6VYcUnHzDr9A8pUN535YwpnJrJCRQNcYX7oOZoQxfxG9WMu4iv3MeJ4EXFKkw",
+                time: "4 hours ago"
+              }
+            ].map((news, i) => (
+              <div key={i} className="shrink-0 w-[300px] md:w-[400px] group cursor-pointer">
+                <div className="relative aspect-video rounded-xl overflow-hidden mb-3 bg-surface-container shadow-lg border border-white/5 group-hover:border-primary/50 transition-all">
+                  <img src={news.image} alt={news.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute bottom-3 left-3 flex gap-2">
+                    <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center border border-white/10">
+                      <span className="material-symbols-outlined text-white text-[16px]">chat</span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center border border-white/10">
+                      <span className="material-symbols-outlined text-white text-[16px]">link</span>
+                    </div>
+                  </div>
+                </div>
+                <h3 className="text-sm font-bold text-white line-clamp-2 group-hover:text-primary transition-colors mb-1">{news.title}</h3>
+                <p className="text-[11px] text-on-surface-variant/60 font-medium">{news.time}</p>
+              </div>
             ))}
           </div>
         </section>
