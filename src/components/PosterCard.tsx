@@ -24,10 +24,10 @@ export function PosterCard({ id, source, title, subtitle, poster, type, tags, ep
   const isAnime = source === 'animewitcher';
 
   return (
-    <Link to={detailUrl} className={`group relative block rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.03] shadow-lg hover:shadow-primary/20 hover:z-10 bg-surface-container ${featured ? 'col-span-2 row-span-2' : ''}`}>
+    <Link to={detailUrl} className={`group relative block rounded-xl overflow-hidden transition-all duration-500 hover:scale-[1.02] shadow-lg hover:shadow-primary/10 hover:z-10 bg-surface-container animate-fade-in ${featured ? 'col-span-2 row-span-2' : ''}`}>
       <div className="relative w-full h-full aspect-[2/3]">
         {poster ? (
-          <LazyImage src={poster} alt={title} containerClassName="w-full h-full" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+          <LazyImage src={poster} alt={title} containerClassName="w-full h-full" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out" />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-surface-container">
             <span className="material-symbols-outlined text-[48px] text-outline-variant">movie</span>
@@ -35,8 +35,15 @@ export function PosterCard({ id, source, title, subtitle, poster, type, tags, ep
         )}
         
         {/* Gradients */}
-        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
-        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300"></div>
+        <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500"></div>
+        
+        {/* Play Icon on Hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="w-12 h-12 rounded-full glass flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-500">
+            <span className="material-symbols-outlined text-white text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+          </div>
+        </div>
 
         {/* Content Overlay */}
         <div className="absolute bottom-0 left-0 w-full p-4 flex flex-col justify-end">
@@ -68,8 +75,8 @@ export function PosterCard({ id, source, title, subtitle, poster, type, tags, ep
 
         {/* Type Badge Top Left */}
         {type && !featured && (
-          <div className="absolute top-2 left-2 bg-gradient-to-r from-primary to-[#ff8f8f] px-2 py-0.5 rounded-sm">
-            <span className="font-label-caps text-[10px] font-black uppercase text-white tracking-widest drop-shadow-md shadow-black">Top Rated</span>
+          <div className="absolute top-2 left-2 glass px-2 py-0.5 rounded-md">
+            <span className="font-label-caps text-[9px] font-black uppercase text-primary tracking-widest">TOP RATED</span>
           </div>
         )}
       </div>

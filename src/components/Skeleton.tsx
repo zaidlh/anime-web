@@ -4,7 +4,7 @@ import { cn } from '../lib/utils';
 export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-surface-container-high", className)}
+      className={cn("shimmer rounded-md bg-surface-container-high", className)}
       {...props}
     />
   );
@@ -26,7 +26,7 @@ export function SkeletonPosterGrid({ count = 12 }: { count?: number }) {
 
 export function SkeletonHero() {
   return (
-    <div className="relative w-full h-[60vh] md:h-[80vh] bg-surface-container-high animate-pulse flex items-center p-6 md:p-12 mb-8 md:mb-12">
+    <div className="relative w-full h-[60vh] md:h-[80vh] bg-surface-container-high shimmer flex items-center p-6 md:p-12 mb-8 md:mb-12">
       <div className="w-full max-w-2xl mt-auto z-10 flex flex-col gap-4">
         <Skeleton className="h-12 w-3/4 bg-surface-container-highest rounded" />
         <Skeleton className="h-4 w-full bg-surface-container-highest rounded mt-4" />

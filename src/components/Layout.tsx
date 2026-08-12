@@ -10,6 +10,9 @@ export default function Layout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const searchResults = useSearchTitles(searchQuery);
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -46,8 +49,8 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-surface font-body-md overflow-x-hidden selection:bg-primary/30 selection:text-white pb-20 md:pb-0">
       {/* TopNavBar */}
-      <header className="bg-background/80 docked full-width top-0 sticky backdrop-blur-xl border-b border-surface-variant z-50">
-        <div className="flex justify-between items-center w-full px-margin-edge py-sm max-w-screen-2xl mx-auto z-50">
+      <header className="glass-dark docked full-width top-0 sticky border-b border-white/5 z-50">
+        <div className="flex justify-between items-center w-full px-4 md:px-margin-edge py-2 md:py-3 max-w-screen-2xl mx-auto z-50">
           <div className="flex items-center gap-md">
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
@@ -68,16 +71,65 @@ export default function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-2">
-            <form onSubmit={handleSearch} className="hidden sm:flex items-center bg-surface-container border border-surface-variant hover:border-outline transition-colors rounded-full px-sm py-xs">
-              <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
-              <input
-                type="search"
-                className="bg-transparent border-none focus:ring-0 text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant w-48 ml-2 focus:outline-none"
-                placeholder="Search titles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
+            <div className="relative hidden sm:block">
+              <form 
+                onSubmit={handleSearch} 
+                className="flex items-center bg-white/5 border border-white/10 hover:border-primary/50 focus-within:border-primary/50 focus-within:bg-white/10 transition-all duration-300 rounded-full px-4 py-1.5"
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              >
+                <span className="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
+                <input
+                  type="search"
+                  className="bg-transparent border-none focus:ring-0 text-sm font-medium text-on-surface placeholder:text-on-surface-variant w-40 lg:w-64 ml-2 focus:outline-none"
+                  placeholder="Search titles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </form>
+              
+              {showSuggestions && searchQuery.trim().length > 1 && (
+                <div className="absolute top-full left-0 right-0 mt-2 glass-dark rounded-xl overflow-hidden shadow-2xl border border-white/10 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="max-h-[400px] overflow-y-auto py-2">
+                    {searchResults.animewitcher.slice(0, 5).map(item => (
+                      <Link 
+                        key={item.id} 
+                        to={`/title/animewitcher/${encodeURIComponent(item.id)}`}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors"
+                      >
+                        <img src={item.poster || ''} className="w-10 h-14 object-cover rounded" alt="" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-on-surface truncate">{item.english_title || item.name}</p>
+                          <p className="text-xs text-on-surface-variant">Anime</p>
+                        </div>
+                      </Link>
+                    ))}
+                    {searchResults.asia2tv.slice(0, 5).map(item => (
+                      <Link 
+                        key={item.id} 
+                        to={`/title/asia2tv/${encodeBase64Url(item.id)}`}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-white/5 transition-colors"
+                      >
+                        <img src={item.poster || ''} className="w-10 h-14 object-cover rounded" alt="" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-on-surface truncate">{item.title}</p>
+                          <p className="text-xs text-on-surface-variant">Drama</p>
+                        </div>
+                      </Link>
+                    ))}
+                    {searchResults.animewitcher.length === 0 && searchResults.asia2tv.length === 0 && (
+                      <div className="px-4 py-3 text-sm text-on-surface-variant text-center">No results found</div>
+                    )}
+                  </div>
+                  <button 
+                    onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery)}`)}
+                    className="w-full py-2 bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors border-t border-white/5"
+                  >
+                    View all results
+                  </button>
+                </div>
+              )}
+            </div>
             <Link to="/search" className="sm:hidden hover:bg-surface-variant transition-all duration-200 p-2 text-on-surface-variant hover:text-on-surface rounded-full flex items-center justify-center">
               <span className="material-symbols-outlined text-[24px]" title="Search">search</span>
             </Link>
@@ -97,7 +149,7 @@ export default function Layout() {
       </main>
 
       {/* Bottom Navigation for Mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-surface-variant z-50 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-dark border-t border-white/5 z-50 pb-safe">
         <div className="flex items-center justify-around py-2 px-2">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
@@ -125,17 +177,17 @@ export default function Layout() {
         </div>
       </nav>
 
-      <footer className="hidden md:block bg-surface-container-lowest w-full border-t border-surface-variant mt-xl">
+      <footer className="hidden md:block bg-surface w-full border-t border-white/5 mt-xl">
         <div className="w-full py-xl px-margin-edge flex flex-col md:flex-row justify-between items-center gap-md max-w-screen-2xl mx-auto">
           <div className="flex flex-col gap-xs items-center md:items-start text-center md:text-left flex-1 min-w-0 pr-8">
-            <span className="font-title-sm text-title-sm font-bold text-on-surface whitespace-nowrap">Animax Catalog</span>
-            <p className="font-body-md text-sm text-on-surface-variant w-full opacity-60">© {new Date().getFullYear()} Animax Catalog. Legal Disclaimer: This site does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
+            <span className="font-title-sm text-title-sm font-bold text-on-surface whitespace-nowrap">ANIMAX</span>
+            <p className="font-body-md text-xs text-on-surface-variant w-full opacity-40">© {new Date().getFullYear()} Animax Catalog. Legal Disclaimer: This site does not store any files on its server. All contents are provided by non-affiliated third parties.</p>
           </div>
           <nav className="flex flex-wrap justify-center gap-md shrink-0">
-            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/terms">Terms</Link>
-            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/privacy">Privacy</Link>
-            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/dmca">DMCA</Link>
-            <Link className="font-body-md text-sm text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/about">About</Link>
+            <Link className="font-body-md text-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/terms">Terms</Link>
+            <Link className="font-body-md text-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/privacy">Privacy</Link>
+            <Link className="font-body-md text-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/dmca">DMCA</Link>
+            <Link className="font-body-md text-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap" to="/about">About</Link>
           </nav>
         </div>
       </footer>

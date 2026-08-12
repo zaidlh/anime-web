@@ -58,7 +58,7 @@ export default function Search() {
           </form>
         </div>
 
-        <div className="mb-xl mt-4 sm:mt-0">
+        <div className="mb-xl mt-4 sm:mt-0 animate-slide-up">
           <h1 className="font-display-lg text-[28px] sm:text-[36px] font-bold text-white mb-2">Search Results for "{q}"</h1>
           <p className="font-body-md text-[#8E8E8E]">{total} titles found</p>
         </div>
@@ -115,6 +115,7 @@ export default function Search() {
   return (
     <div className="w-full max-w-[1200px] mx-auto min-h-[90vh] bg-[#101010] flex flex-col pt-4 px-4 sm:px-6 pb-24">
       {/* Search Input Bar */}
+      <div className="animate-slide-up">
       <form onSubmit={handleSearch} className="flex flex-row items-center bg-[#1E1E1E] border border-[#2D2D2D] rounded-xl px-4 py-3 relative mb-8">
         <span className="material-symbols-outlined text-[#8E8E8E] mr-3">search</span>
         <input
@@ -197,8 +198,9 @@ export default function Search() {
         </div>
       </section>
 
+      </div>
       {/* New Season Hits */}
-      <section className="mb-0">
+      <section className="mb-0 animate-slide-up [animation-delay:400ms]">
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#2a1215] to-[#120a0b] border border-[#3e1b1e] p-6 flex flex-row items-center min-h-[160px]">
           <div className="flex flex-col z-10 w-full md:w-[60%]">
             <h2 className="text-[20px] sm:text-[22px] font-bold text-white tracking-wide mb-2">New Season Hits</h2>

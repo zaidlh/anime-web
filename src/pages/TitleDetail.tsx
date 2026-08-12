@@ -107,15 +107,15 @@ export default function TitleDetail() {
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/30 to-background/90 md:to-transparent"></div>
       </div>
 
-      <div className="relative z-10 max-w-[1200px] mx-auto px-margin-edge pt-[30vh] md:pt-[45vh] pb-xl flex flex-col md:flex-row gap-lg items-end md:items-start">
+      <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-margin-edge pt-[20vh] sm:pt-[30vh] md:pt-[45vh] pb-xl flex flex-col md:flex-row gap-lg items-end md:items-start">
         
-        {/* Mobile Poster (Optional, if we want to show it on mobile) */}
-        {/* <div className="md:hidden w-1/3 aspect-[2/3] rounded-lg overflow-hidden border border-outline-variant shadow-2xl mx-auto mb-4">
-          <img src={t.poster} className="w-full h-full object-cover" />
-        </div> */}
+        {/* Mobile Poster */}
+        <div className="md:hidden w-[140px] sm:w-[180px] aspect-[2/3] rounded-xl overflow-hidden border-2 border-white/10 shadow-2xl mx-auto -mb-12 relative z-20 animate-slide-up">
+          <img src={t.poster} className="w-full h-full object-cover" alt={displayTitle} />
+        </div>
 
         {/* Content */}
-        <div className="flex-1 w-full flex flex-col gap-md text-center md:text-left pt-12 md:pt-0">
+        <div className="flex-1 w-full flex flex-col gap-md text-center md:text-left pt-16 md:pt-0 animate-slide-up [animation-delay:100ms]">
           
           <div className="flex items-center justify-center md:justify-start gap-4 mb-2 flex-wrap">
             <span className="bg-primary/20 text-primary px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase border border-primary/30">

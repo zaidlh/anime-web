@@ -50,7 +50,7 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 px-margin-edge w-full max-w-screen-2xl mx-auto pb-10">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl animate-slide-up">
             <div className="flex items-center gap-3 mb-4">
               <span className="bg-primary text-white px-2 py-0.5 rounded-sm font-label-caps text-[10px] uppercase tracking-widest font-bold shadow-[0_0_10px_rgba(255,77,77,0.4)]">
                 Trending #1
@@ -84,7 +84,7 @@ export default function Home() {
       <div className="max-w-screen-2xl mx-auto px-margin-edge">
         
         {/* Continue Watching */}
-        <section className="mb-12">
+        <section className="mb-12 animate-slide-up [animation-delay:200ms]">
           <div className="flex justify-between items-end mb-6">
             <h2 className="font-display-lg text-[22px] md:text-[28px] font-bold text-white tracking-tight">Continue Watching</h2>
             <Link to="/mylist" className="text-primary font-title-sm hover:underline flex items-center gap-1 text-sm font-semibold">
@@ -141,7 +141,7 @@ export default function Home() {
 
         {/* Recently Viewed Strip */}
         {recent.length > 0 && (
-          <section className="mb-12">
+          <section className="mb-12 animate-slide-up [animation-delay:400ms]">
             <div className="flex justify-between items-end mb-6">
               <h2 className="font-display-lg text-[22px] md:text-[28px] font-bold text-white tracking-tight">Recently Viewed</h2>
             </div>
@@ -162,7 +162,7 @@ export default function Home() {
         )}
 
         {/* Top Rated Series */}
-        <section className="mb-12">
+        <section className="mb-12 animate-slide-up [animation-delay:600ms]">
           <div className="flex justify-between items-end mb-6">
             <h2 className="font-display-lg text-[22px] md:text-[28px] font-bold text-white tracking-tight">Top Rated Series</h2>
             <button className="text-on-surface-variant hover:text-white transition-colors">

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ClassifiedServer, getBestServer } from '../servers';
 import Hls from 'hls.js';
+import { useToast } from './Toast';
 
 interface VideoPlayerProps {
   servers: ClassifiedServer[];
@@ -22,6 +23,8 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
   const [videoError, setVideoError] = useState<string | null>(null);
   const [osdMessage, setOsdMessage] = useState<string | null>(null);
   const [osdIcon, setOsdIcon] = useState<string | null>(null);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const { showToast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const osdTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -159,6 +162,11 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
           video.currentTime -= 10;
           showOsd('replay_10', 'Seek -10s');
           break;
+        case 't':
+          e.preventDefault();
+          setIsTheaterMode(prev => !prev);
+          showOsd('aspect_ratio', isTheaterMode ? 'Exit Theater' : 'Theater Mode');
+          break;
       }
     };
 
@@ -172,8 +180,11 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
   const allServers = [...nativeServers, ...iframeServers, ...externalServers];
 
   return (
-    <div className="flex flex-col gap-lg">
-      <section className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20">
+    <div className={`flex flex-col gap-lg ${isTheaterMode ? 'theater-mode' : ''}`}>
+      {isTheaterMode && (
+        <div className="fixed inset-0 bg-black/90 z-[40] animate-in fade-in duration-500" onClick={() => setIsTheaterMode(false)} />
+      )}
+      <section className={`w-full aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant/30 mb-md relative group video-glow transition-all duration-500 hover:border-primary/20 z-[45] ${isTheaterMode ? 'md:fixed md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-[90vw] md:max-h-[80vh] md:shadow-[0_0_100px_rgba(0,0,0,0.8)]' : ''}`}>
         {!selectedServer ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center backdrop-blur-sm bg-black/60">
             <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-4">open_in_new</span>
@@ -251,6 +262,15 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
             </div>
           </div>
         )}
+        
+        {/* Theater Toggle Button */}
+        <button 
+          onClick={() => setIsTheaterMode(!isTheaterMode)}
+          className="absolute bottom-4 right-4 p-2 glass rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity z-30 hidden md:flex items-center justify-center"
+          title="Theater Mode (T)"
+        >
+          <span className="material-symbols-outlined">{isTheaterMode ? 'close_fullscreen' : 'aspect_ratio'}</span>
+        </button>
       </section>
 
       <div className="flex flex-col lg:flex-row justify-between items-start gap-md mb-xl">
@@ -306,10 +326,11 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
                   title: `${title} - ${episodeName}`,
                   text: `Check out ${episodeName} of ${title} on Animax!`,
                   url: window.location.href,
-                }).catch(console.error);
+                }).then(() => showToast('Shared successfully!', 'success'))
+                .catch(console.error);
               } else {
                 navigator.clipboard.writeText(window.location.href);
-                // We don't have useToast here, but clipboard fallback works
+                showToast('Link copied to clipboard!', 'success');
               }
             }}
             aria-label="Share this episode"
