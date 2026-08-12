@@ -200,12 +200,28 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
                 <span className="material-symbols-outlined text-[48px] text-error mb-4">error_outline</span>
                 <p className="font-headline-md font-bold text-on-surface mb-2">Playback Error</p>
                 <p className="font-body-md text-on-surface-variant max-w-md">{videoError}</p>
-                <button 
-                  onClick={() => setVideoError(null)}
-                  className="mt-6 px-lg py-sm bg-surface-container rounded-lg font-title-sm font-bold text-on-surface hover:bg-surface-variant transition-colors"
-                >
-                  Dismiss
-                </button>
+                <div className="flex gap-4 mt-6">
+                  <button 
+                    onClick={() => {
+                      setVideoError(null);
+                      if (videoRef.current) {
+                        const src = videoRef.current.src;
+                        videoRef.current.src = '';
+                        videoRef.current.src = src;
+                        videoRef.current.load();
+                      }
+                    }}
+                    className="px-lg py-sm bg-primary text-white rounded-lg font-title-sm font-bold hover:brightness-110 transition-all"
+                  >
+                    Retry
+                  </button>
+                  <button 
+                    onClick={() => setVideoError(null)}
+                    className="px-lg py-sm bg-surface-container rounded-lg font-title-sm font-bold text-on-surface hover:bg-surface-variant transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
             <video
@@ -213,13 +229,15 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               controls
               preload="metadata"
               poster={poster || undefined}
-              referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
               className="w-full h-full object-cover outline-none"
               onError={(e) => {
                 const target = e.target as HTMLVideoElement;
-                if (!target.error) return; // ignore generic events if error details are missing
-                console.error("Video error:", target.error.message, target.error.code);
-                setVideoError("The video stream could not be loaded. Please try selecting a different server.");
+                console.error("Video error event:", e);
+                if (target.error) {
+                  console.error("Video error details:", target.error.message, target.error.code);
+                }
+                setVideoError("The video stream could not be loaded. This may be due to a broken link or server restriction. Please try a different server.");
               }}
               onEnded={onEnded}
               onLoadedMetadata={(e) => {
@@ -252,8 +270,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
             <iframe
               src={selectedServer.embedUrl as string}
               allowFullScreen
-              referrerPolicy="no-referrer"
-              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups"
+              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-autoplay"
               className="w-full h-full border-0"
               title={`${title} - ${episodeName}`}
             />
