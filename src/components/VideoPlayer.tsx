@@ -230,6 +230,7 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               preload="metadata"
               poster={poster || undefined}
               crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover outline-none"
               onError={(e) => {
                 const target = e.target as HTMLVideoElement;

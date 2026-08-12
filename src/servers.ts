@@ -117,6 +117,13 @@ export function getBestServer(servers: ClassifiedServer[], preference: 'best' | 
   const playable = servers.filter(s => s.capability === 'native' || s.capability === 'iframe');
   if (playable.length === 0) return null;
 
+  // Prioritize Pixeldrain (PX) as requested by user
+  const pxServers = playable.filter(s => 
+    s.name.toLowerCase().includes('pixeldrain') || 
+    s.name.toLowerCase().includes('px') ||
+    (s.directUrl && s.directUrl.includes('pixeldrain.com'))
+  );
+  
   const qualityRank = (q: string | null): number => {
     if (!q) return 0;
     if (q.includes('1080')) return 4;
@@ -125,15 +132,18 @@ export function getBestServer(servers: ClassifiedServer[], preference: 'best' | 
     return 1;
   };
 
+  // If PX servers exist, only consider them. Otherwise use all playable.
+  const targetList = pxServers.length > 0 ? pxServers : playable;
+
   if (preference === 'best') {
-    return playable.sort((a, b) => qualityRank(b.quality) - qualityRank(a.quality))[0];
+    return targetList.sort((a, b) => qualityRank(b.quality) - qualityRank(a.quality))[0];
   }
 
-  const preferred = playable.find(s => s.quality?.includes(preference));
+  const preferred = targetList.find(s => s.quality?.includes(preference));
   if (preferred) return preferred;
 
-  // Fallback to best available
-  return playable.sort((a, b) => qualityRank(b.quality) - qualityRank(a.quality))[0];
+  // Fallback to best available in targetList
+  return targetList.sort((a, b) => qualityRank(b.quality) - qualityRank(a.quality))[0];
 }
 
 export function getDownloadableServers(servers: ClassifiedServer[]): ClassifiedServer[] {
