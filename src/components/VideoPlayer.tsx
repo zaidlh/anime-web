@@ -229,7 +229,6 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
               controls
               preload="metadata"
               poster={poster || undefined}
-              crossOrigin="anonymous"
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover outline-none"
               onError={(e) => {
@@ -333,6 +332,17 @@ export function VideoPlayer({ servers, poster, title, episodeName, titleDetailUr
         </div>
 
         <div className="w-full lg:w-auto mt-md lg:mt-0 flex flex-col sm:flex-row items-center gap-sm">
+          {selectedServer?.directUrl && (
+            <a 
+              href={selectedServer.directUrl} 
+              target="_blank" 
+              rel="noreferrer"
+              className="w-full sm:w-auto flex-1 flex items-center justify-center gap-sm px-lg py-4 rounded-xl bg-surface-container-high border border-white/10 text-on-surface font-headline-md text-[18px] shadow-xl hover:bg-surface-variant active:scale-[0.98] transition-all font-bold"
+            >
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'wght' 600" }}>open_in_new</span>
+              Direct View
+            </a>
+          )}
           <Link to={downloadUrl} aria-label="Download Episode" className="w-full sm:w-auto flex-1 flex items-center justify-center gap-sm px-lg py-4 rounded-xl bg-primary-container text-on-primary-container font-headline-md text-[18px] shadow-xl hover:brightness-110 active:scale-[0.98] transition-all font-bold">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'wght' 600" }}>download</span>
             Download
