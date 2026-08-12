@@ -14,12 +14,15 @@ export function classifyServerUrl(url: string, name: string, quality: string | n
   const lowerName = name.toLowerCase();
 
   // Pixeldrain direct API rewrite
-  const pdMatch = url.match(/pixeldrain\.com\/(?:u|api\/file)\/([a-zA-Z0-9_-]+)/i);
+  // Handles: /u/ID, /api/file/ID, /l/ID (if single file), and just ID
+  const pdMatch = url.match(/pixeldrain\.com\/(?:u|api\/file|l)\/([a-zA-Z0-9_-]+)/i);
   if (pdMatch) {
+    const fileId = pdMatch[1];
     return {
       name, quality, capability: 'native',
-      directUrl: `https://pixeldrain.com/api/file/${pdMatch[1]}`, 
-      embedUrl: null, originalUrl: url,
+      directUrl: `https://pixeldrain.com/api/file/${fileId}`, 
+      embedUrl: `https://pixeldrain.com/api/file/${fileId}`,
+      originalUrl: url,
     };
   }
 
