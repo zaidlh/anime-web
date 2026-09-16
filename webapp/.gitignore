@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+instance/
+downloads/
+youtube_downloads/
+venv/
+.venv/
+*.mp4
+*.mkv
+*.webm
+youtube_cookies.txt

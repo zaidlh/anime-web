@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}لوحة التحكم{% endblock %}
+{% block content %}
+<div class="topbar"><h1>🏠 لوحة التحكم</h1></div>
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="num">{{ stats.total }}</div><div class="label">إجمالي الملفات المحمّلة</div></div>
+  <div class="stat-card"><div class="num">{{ stats.uploaded }}</div><div class="label">تم رفعها لفيسبوك</div></div>
+  <div class="stat-card"><div class="num">{{ stats.pending }}</div><div class="label">بانتظار الرفع</div></div>
+  <div class="stat-card"><div class="num">{{ stats.size_mb }} MB</div><div class="label">المساحة المستخدمة</div></div>
+</div>
+
+<div class="card">
+  <h3>ابدأ الآن</h3>
+  <div class="toolbar">
+    <a class="btn btn-primary" href="{{ url_for('anime_page') }}">🎬 تحميل أنمي جديد</a>
+    <a class="btn btn-primary" href="{{ url_for('youtube_page') }}">📺 تحميل من يوتيوب</a>
+    <a class="btn btn-secondary" href="{{ url_for('downloads_page') }}">📁 عرض الملفات الجاهزة للرفع</a>
+  </div>
+</div>
+
+{% if not fb_configured %}
+<div class="card" style="border-color:#ffd166">
+  ⚠️ لم يتم ضبط بيانات اعتماد فيسبوك بعد. اذهب إلى <a href="{{ url_for('settings_page') }}"><b>الإعدادات</b></a> لإضافتها قبل استخدام ميزة الرفع.
+</div>
+{% endif %}
+{% endblock %}

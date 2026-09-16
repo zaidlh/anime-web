@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}الإعدادات{% endblock %}
+{% block content %}
+<div class="topbar"><h1>⚙️ الإعدادات</h1></div>
+
+{% if saved %}<div class="card" style="border-color:#00b894">✅ تم حفظ الإعدادات بنجاح.</div>{% endif %}
+
+<form method="post" class="card">
+  <h3>بيانات فيسبوك</h3>
+  <div class="field"><label>Page ID</label><input type="text" name="FB_PAGE_ID" value="{{ cfg.FB_PAGE_ID }}"></div>
+  <div class="field"><label>Access Token</label><input type="text" name="FB_ACCESS_TOKEN" value="{{ cfg.FB_ACCESS_TOKEN }}"></div>
+  <div class="field"><label>App Secret</label><input type="text" name="FB_APP_SECRET" value="{{ cfg.FB_APP_SECRET }}"></div>
+
+  <h3>موقع الأنمي المصدر</h3>
+  <div class="field"><label>الرابط الأساسي</label><input type="text" name="ANIME_SITE" value="{{ cfg.ANIME_SITE }}"></div>
+
+  <h3>كلمة مرور الدخول للموقع</h3>
+  <div class="field"><label>كلمة مرور جديدة (اتركها فارغة لعدم التغيير)</label><input type="password" name="SITE_PASSWORD" placeholder="••••••••"></div>
+
+  <button class="btn btn-primary" type="submit">💾 حفظ الإعدادات</button>
+</form>
+
+<div class="card">
+  <h3>🍪 كوكيز يوتيوب</h3>
+  <p style="color:var(--muted);font-size:13px">
+    لتفادي خطأ "Sign in to confirm you're not a bot"، صدّر كوكيز يوتيوب من متصفحك (إضافة
+    <a href="https://chrome.google.com/webstore/detail/get-cookiestxt-locally/ccmclkhjbdinkpcefbnoaelbdgeamlen" target="_blank">Get cookies.txt</a>)
+    وضع الملف باسم <code>youtube_cookies.txt</code> في مجلد المشروع على السيرفر.
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}تحميل أنمي{% endblock %}
+{% block content %}
+<div class="topbar"><h1>🎬 تحميل أنمي</h1></div>
+
+<div class="card">
+  <label>اسم الأنمي أو رابط صفحته</label>
+  <div class="toolbar" style="margin:0">
+    <div style="flex:1"><input type="text" id="anime-search-input" placeholder="مثال: ون بيس، أو الصق رابط الصفحة مباشرة"></div>
+    <button class="btn btn-primary" id="anime-search-btn">🔎 بحث / جلب</button>
+  </div>
+</div>
+
+<div id="anime-results"></div>
+<div id="anime-info"></div>
+
+<div class="card" id="anime-toolbar" style="display:none">
+  <div class="toolbar">
+    <div class="pill-group" id="anime-quality">
+      <div class="pill" data-q="SD">SD</div>
+      <div class="pill active" data-q="HD">HD</div>
+      <div class="pill" data-q="FHD">FHD</div>
+    </div>
+    <button class="btn btn-secondary" id="anime-dl-selected">⬇️ تحميل المحدد (<span id="anime-selected-count">0</span>)</button>
+    <button class="btn btn-primary" id="anime-dl-all">⬇️ تحميل الكل</button>
+  </div>
+  <div class="grid" id="anime-episodes"></div>
+</div>
+
+<div class="card" id="anime-log-card" style="display:none">
+  <h3>سجل التحميل</h3>
+  <div class="progress-bar" id="anime-progress-bar"><div style="width:0%"></div></div>
+  <div class="log-panel" id="anime-log-panel"></div>
+</div>
+<div id="anime-done-box"></div>
+{% endblock %}

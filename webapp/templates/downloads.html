@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}الملفات الجاهزة{% endblock %}
+{% block content %}
+<div class="topbar"><h1>📁 الملفات الجاهزة للرفع</h1></div>
+
+<div class="card">
+  <div class="toolbar">
+    <label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" id="downloads-select-all"> تحديد الكل</label>
+    <button class="btn btn-primary" id="downloads-upload-btn">📤 رفع المحدد إلى فيسبوك</button>
+  </div>
+  <table class="files">
+    <thead><tr><th></th><th>الملف</th><th>تفاصيل</th><th>الحجم</th><th>الحالة</th><th></th></tr></thead>
+    <tbody id="downloads-tbody"></tbody>
+  </table>
+  <div class="empty-state" id="downloads-empty" style="display:none">لا توجد ملفات محمّلة بعد. اذهب إلى صفحة تحميل الأنمي أو يوتيوب.</div>
+</div>
+
+<div class="card" id="downloads-log-card" style="display:none">
+  <h3>سجل الرفع</h3>
+  <div class="progress-bar" id="downloads-progress-bar"><div style="width:0%"></div></div>
+  <div class="log-panel" id="downloads-log-panel"></div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+Flask>=3.0
+python-dotenv>=1.0
+requests>=2.31
+beautifulsoup4>=4.12
+gdown>=5.1
+youtube-dl>=2021.12.17
+yt-dlp>=2024.8.6
+ffmpeg-python>=0.2.0
+gunicorn>=22.0

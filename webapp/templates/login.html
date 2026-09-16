@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تسجيل الدخول — Animax Suite</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="login-wrap">
+    <form class="login-card" method="post">
+      <div class="brand">🎬 Animax Suite</div>
+      <p>أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+      <div class="field">
+        <input type="password" name="password" placeholder="كلمة المرور" autofocus required>
+      </div>
+      <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">دخول</button>
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    </form>
+  </div>
+</body>
+</html>

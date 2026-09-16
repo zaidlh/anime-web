@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}تحميل يوتيوب{% endblock %}
+{% block content %}
+<div class="topbar"><h1>📺 تحميل يوتيوب</h1></div>
+
+<div class="card">
+  <label>رابط فيديو أو قائمة تشغيل</label>
+  <div class="toolbar" style="margin:0">
+    <div style="flex:1"><input type="url" id="yt-url-input" placeholder="https://www.youtube.com/watch?v=..."></div>
+    <button class="btn btn-primary" id="yt-fetch-btn">📥 جلب</button>
+  </div>
+</div>
+
+<div id="yt-info"></div>
+
+<div class="card" id="yt-toolbar" style="display:none">
+  <div class="toolbar">
+    <div class="pill-group" id="yt-quality">
+      <div class="pill" data-q="SD">SD</div>
+      <div class="pill active" data-q="HD">HD</div>
+      <div class="pill" data-q="FHD">FHD</div>
+    </div>
+    <button class="btn btn-secondary" id="yt-dl-selected">⬇️ تحميل المحدد (<span id="yt-selected-count">0</span>)</button>
+    <button class="btn btn-primary" id="yt-dl-all">⬇️ تحميل الكل</button>
+  </div>
+  <div class="grid" id="yt-videos"></div>
+</div>
+
+<div class="card" id="yt-log-card" style="display:none">
+  <h3>سجل التحميل</h3>
+  <div class="progress-bar" id="yt-progress-bar"><div style="width:0%"></div></div>
+  <div class="log-panel" id="yt-log-panel"></div>
+</div>
+<div id="yt-done-box"></div>
+{% endblock %}
